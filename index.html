@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>চিশতিয়া ট্রান্সপোর্ট - রিয়েল-টাইম সিস্টেম</title>
+    <title>চিশতিয়া ট্রান্সপোর্ট - সম্পূর্ণ ম্যানেজমেন্ট সিস্টেম</title>
     
     <!-- Firebase v10 SDK -->
     <script type="module">
@@ -32,7 +32,7 @@
         window.dbRemove = remove;
         window.firebaseReady = true;
         
-        console.log('✅ Firebase Connected Successfully!');
+        console.log('✅ Firebase Connected!');
     </script>
     
     <!-- QR Code Libraries -->
@@ -49,7 +49,6 @@
             padding: 20px;
         }
         
-        /* Connection Status */
         .status {
             position: fixed;
             top: 20px;
@@ -81,7 +80,6 @@
             50% { opacity: 0.5; }
         }
         
-        /* Login Screen */
         .login-container {
             max-width: 450px;
             margin: 80px auto;
@@ -139,7 +137,6 @@
             opacity: 0.9;
         }
         
-        /* Main Container */
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -170,7 +167,6 @@
             border-radius: 10px;
         }
         
-        /* Tabs */
         .tabs {
             display: flex;
             background: #f8f9fa;
@@ -190,6 +186,7 @@
             color: #495057;
             transition: all 0.3s;
             display: none;
+            white-space: nowrap;
         }
         
         .tab.visible {
@@ -224,7 +221,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
         
-        /* Form Elements */
         .form-group {
             margin-bottom: 20px;
         }
@@ -259,7 +255,12 @@
             gap: 20px;
         }
         
-        /* Buttons */
+        .grid-3 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
         .btn {
             padding: 14px 30px;
             border: none;
@@ -308,7 +309,6 @@
             font-size: 0.9em;
         }
         
-        /* Parcel Card */
         .parcel-card {
             background: #f8f9fa;
             border: 2px solid #e9ecef;
@@ -336,6 +336,7 @@
             border-radius: 20px;
             font-size: 0.9em;
             font-weight: 600;
+            margin-right: 10px;
         }
         
         .status-pending { background: #fff3cd; color: #856404; }
@@ -343,7 +344,75 @@
         .status-unloaded { background: #d4edda; color: #155724; }
         .status-delivered { background: #d1e7dd; color: #0f5132; }
         
-        /* QR Code */
+        .payment-paid { background: #d1e7dd; color: #0f5132; }
+        .payment-due { background: #f8d7da; color: #842029; }
+        
+        .invoice {
+            background: white;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 40px;
+            border: 2px solid #2a5298;
+            border-radius: 10px;
+        }
+        
+        .invoice-header {
+            text-align: center;
+            border-bottom: 3px solid #2a5298;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .invoice-header h1 {
+            color: #2a5298;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .invoice-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+        
+        .invoice-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        
+        .invoice-section h3 {
+            color: #2a5298;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 10px;
+        }
+        
+        .invoice-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #dee2e6;
+        }
+        
+        .invoice-row:last-child {
+            border-bottom: none;
+        }
+        
+        .invoice-total {
+            background: #2a5298;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 30px;
+            text-align: center;
+        }
+        
+        .invoice-total h2 {
+            font-size: 2em;
+        }
+        
         .qr-container {
             text-align: center;
             padding: 25px;
@@ -359,7 +428,6 @@
             border-radius: 10px;
         }
         
-        /* Scanner */
         .scanner-container {
             background: #f8f9fa;
             border-radius: 10px;
@@ -393,7 +461,6 @@
             border: 2px solid #842029;
         }
         
-        /* Stats */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
@@ -414,7 +481,43 @@
             margin-bottom: 10px;
         }
         
-        /* Utilities */
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-box input {
+            padding-left: 45px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-size: 1.2em;
+        }
+        
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+        
+        .radio-group label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            margin-bottom: 0;
+        }
+        
+        .radio-group input[type="radio"] {
+            width: auto;
+            margin: 0;
+        }
+        
         .hidden { display: none !important; }
         .no-data {
             text-align: center;
@@ -423,34 +526,33 @@
             font-size: 1.2em;
         }
         
-        /* Responsive */
         @media (max-width: 768px) {
             .header { flex-direction: column; text-align: center; }
             .header h1 { font-size: 1.5em; }
             .tab { font-size: 0.9em; padding: 15px 10px; }
             .content { padding: 20px; }
-            .grid-2 { grid-template-columns: 1fr; }
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .invoice-info { grid-template-columns: 1fr; }
         }
         
         @media print {
             body * { visibility: hidden; }
-            .qr-container, .qr-container * { visibility: visible; }
-            .qr-container { position: absolute; left: 0; top: 0; }
+            .invoice, .invoice * { visibility: visible; }
+            .invoice { position: absolute; left: 0; top: 0; }
+            .btn, .status { display: none !important; }
         }
     </style>
 </head>
 <body>
-    <!-- Connection Status -->
     <div class="status">
         <div class="dot" id="statusDot"></div>
         <span id="statusText">সংযোগ হচ্ছে...</span>
     </div>
 
-    <!-- Login Screen -->
     <div class="login-container" id="loginScreen">
         <div class="login-header">
             <h1>🚛 চিশতিয়া ট্রান্সপোর্ট</h1>
-            <p>রিয়েল-টাইম ম্যানেজমেন্ট সিস্টেম</p>
+            <p>সম্পূর্ণ ম্যানেজমেন্ট সিস্টেম</p>
         </div>
         
         <div class="form-group">
@@ -481,12 +583,11 @@
         </button>
     </div>
 
-    <!-- Main App -->
     <div class="container" id="mainApp">
         <div class="header">
             <div>
                 <h1>🚛 চিশতিয়া ট্রান্সপোর্ট</h1>
-                <p>রিয়েল-টাইম সিস্টেম</p>
+                <p>সম্পূর্ণ ম্যানেজমেন্ট সিস্টেম</p>
             </div>
             <div>
                 <div class="user-info">
@@ -499,8 +600,10 @@
 
         <div class="tabs">
             <button class="tab" id="tab-new-parcel" onclick="showTab('new-parcel')">📦 নতুন পার্সেল</button>
+            <button class="tab" id="tab-search" onclick="showTab('search')">🔍 খুঁজুন</button>
             <button class="tab" id="tab-scanner" onclick="showTab('scanner')">📷 স্ক্যান করুন</button>
             <button class="tab" id="tab-parcel-list" onclick="showTab('parcel-list')">📋 পার্সেল তালিকা</button>
+            <button class="tab" id="tab-accounts" onclick="showTab('accounts')">💰 হিসাব</button>
             <button class="tab" id="tab-reports" onclick="showTab('reports')">📊 রিপোর্ট</button>
         </div>
 
@@ -510,7 +613,6 @@
     </div>
 
     <script>
-        // Global variables
         let currentUser = { role: null, name: null };
         let selectedRole = null;
         let counter = 1;
@@ -518,16 +620,13 @@
         let html5QrCode = null;
         let currentScannedParcelId = null;
 
-        // Wait for Firebase
         function waitForFirebase(callback) {
             if (window.firebaseReady) callback();
             else setTimeout(() => waitForFirebase(callback), 100);
         }
 
-        // Initialize Firebase listeners
         function initFirebase() {
             waitForFirebase(() => {
-                // Connection status
                 const connRef = window.dbRef(window.db, '.info/connected');
                 window.dbOnValue(connRef, (snap) => {
                     const online = snap.val() === true;
@@ -535,13 +634,11 @@
                     document.getElementById('statusText').textContent = online ? 'অনলাইন' : 'অফলাইন';
                 });
 
-                // Counter
                 const counterRef = window.dbRef(window.db, 'counter');
                 window.dbOnValue(counterRef, (snap) => {
                     if (snap.exists()) counter = snap.val();
                 });
 
-                // Parcels
                 const parcelsRef = window.dbRef(window.db, 'parcels');
                 window.dbOnValue(parcelsRef, (snap) => {
                     parcels = [];
@@ -553,12 +650,12 @@
                     if (currentUser.role === 'manager') {
                         updateParcelList();
                         updateReports();
+                        updateAccounts();
                     }
                 });
             });
         }
 
-        // Login
         function selectRole(role) {
             selectedRole = role;
             document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
@@ -604,7 +701,7 @@
 
         function setupUIForRole(role) {
             const tabs = {
-                'manager': ['new-parcel', 'scanner', 'parcel-list', 'reports'],
+                'manager': ['new-parcel', 'search', 'scanner', 'parcel-list', 'accounts', 'reports'],
                 'scanner': ['scanner'],
                 'delivery': ['scanner']
             };
@@ -638,9 +735,9 @@
             
             if (tabName === 'parcel-list') updateParcelList();
             else if (tabName === 'reports') updateReports();
+            else if (tabName === 'accounts') updateAccounts();
         }
 
-        // Manager Interface
         function loadManagerInterface() {
             document.getElementById('contentArea').innerHTML = `
                 <div id="new-parcel" class="tab-content active">
@@ -680,25 +777,108 @@
                             </div>
                         </div>
                         <div class="form-group">
+                            <label>পেমেন্ট স্ট্যাটাস *</label>
+                            <div class="radio-group">
+                                <label>
+                                    <input type="radio" name="paymentStatus" value="paid" checked>
+                                    <span>✅ পরিশোধিত (Paid)</span>
+                                </label>
+                                <label>
+                                    <input type="radio" name="paymentStatus" value="due">
+                                    <span>⏳ বাকি (Due)</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
                             <label>পার্সেলের বিবরণ</label>
-                            <textarea id="description" rows="3"></textarea>
+                            <textarea id="description" rows="2"></textarea>
                         </div>
                         <button type="submit" class="btn btn-primary" style="width: 100%;">
-                            ✅ পার্সেল যোগ করুন এবং QR তৈরি করুন
+                            ✅ পার্সেল যোগ করুন এবং Invoice তৈরি করুন
                         </button>
                     </form>
                     
-                    <div id="receiptDiv" class="hidden">
-                        <div class="qr-container">
-                            <h3 style="margin-bottom: 15px; color: #2a5298;">QR কোড - স্ক্যান করুন</h3>
-                            <div id="qr-code"></div>
-                            <p id="parcel-id-text" style="margin-top: 15px; font-size: 1.2em; font-weight: bold; color: #2a5298;"></p>
+                    <div id="invoiceDiv" class="hidden">
+                        <div class="invoice" id="invoiceContent">
+                            <div class="invoice-header">
+                                <h1>🚛 চিশতিয়া ট্রান্সপোর্ট</h1>
+                                <p style="font-size: 1.2em; margin-top: 10px;">পার্সেল ইনভয়েস</p>
+                                <p style="margin-top: 10px;">তারিখ: <span id="invoiceDate"></span></p>
+                            </div>
+                            
+                            <div class="qr-container">
+                                <div id="qr-code"></div>
+                                <p id="invoice-parcel-id" style="margin-top: 15px; font-size: 1.3em; font-weight: bold; color: #2a5298;"></p>
+                            </div>
+                            
+                            <div class="invoice-info">
+                                <div class="invoice-section">
+                                    <h3>প্রেরকের তথ্য</h3>
+                                    <div class="invoice-row">
+                                        <span>নাম:</span>
+                                        <strong id="inv-sender-name"></strong>
+                                    </div>
+                                    <div class="invoice-row">
+                                        <span>মোবাইল:</span>
+                                        <strong id="inv-sender-phone"></strong>
+                                    </div>
+                                </div>
+                                
+                                <div class="invoice-section">
+                                    <h3>প্রাপকের তথ্য</h3>
+                                    <div class="invoice-row">
+                                        <span>নাম:</span>
+                                        <strong id="inv-receiver-name"></strong>
+                                    </div>
+                                    <div class="invoice-row">
+                                        <span>মোবাইল:</span>
+                                        <strong id="inv-receiver-phone"></strong>
+                                    </div>
+                                    <div class="invoice-row">
+                                        <span>গন্তব্য:</span>
+                                        <strong id="inv-destination"></strong>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="invoice-section">
+                                <h3>পার্সেলের বিবরণ</h3>
+                                <div class="invoice-row">
+                                    <span>বিবরণ:</span>
+                                    <strong id="inv-description"></strong>
+                                </div>
+                                <div class="invoice-row">
+                                    <span>স্ট্যাটাস:</span>
+                                    <strong id="inv-status"></strong>
+                                </div>
+                            </div>
+                            
+                            <div class="invoice-total">
+                                <p style="margin-bottom: 10px;">ডেলিভারি চার্জ</p>
+                                <h2 id="inv-charge"></h2>
+                                <p style="margin-top: 10px; font-size: 1.1em;" id="inv-payment-status"></p>
+                            </div>
+                            
+                            <div style="margin-top: 30px; text-align: center; color: #6c757d; border-top: 2px dashed #dee2e6; padding-top: 20px;">
+                                <p>ধন্যবাদ! আমাদের সাথে থাকার জন্য</p>
+                                <p style="margin-top: 5px;">চিশতিয়া ট্রান্সপোর্ট - বিশ্বস্ত সেবা</p>
+                            </div>
                         </div>
+                        
                         <div style="text-align: center; margin-top: 20px;">
-                            <button class="btn btn-success" onclick="window.print()">🖨️ প্রিন্ট করুন</button>
+                            <button class="btn btn-success" onclick="printInvoice()">🖨️ প্রিন্ট করুন</button>
                             <button class="btn btn-primary" onclick="resetForm()">➕ নতুন পার্সেল</button>
                         </div>
                     </div>
+                </div>
+
+                <div id="search" class="tab-content">
+                    <h2 style="margin-bottom: 25px; color: #2a5298;">পার্সেল খুঁজুন</h2>
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="searchInput" placeholder="পার্সেল আইডি লিখুন (যেমন: CT000001)" oninput="searchParcel()">
+                    </div>
+                    <div id="searchResult"></div>
                 </div>
 
                 <div id="scanner" class="tab-content">
@@ -719,9 +899,23 @@
                     <div id="parcelListContainer"></div>
                 </div>
 
+                <div id="accounts" class="tab-content">
+                    <h2 style="margin-bottom: 25px; color: #2a5298;">💰 হিসাব ও আয়-ব্যয়</h2>
+                    <div class="stats-grid" id="accountsStats"></div>
+                    
+                    <h3 style="margin: 30px 0 20px; color: #2a5298;">পেমেন্ট স্ট্যাটাস</h3>
+                    <div class="grid-2" id="paymentBreakdown"></div>
+                    
+                    <h3 style="margin: 30px 0 20px; color: #2a5298;">গন্তব্য অনুযায়ী হিসাব</h3>
+                    <div id="destinationAccounts"></div>
+                </div>
+
                 <div id="reports" class="tab-content">
-                    <h2 style="margin-bottom: 25px; color: #2a5298;">রিপোর্ট এবং হিসাব</h2>
+                    <h2 style="margin-bottom: 25px; color: #2a5298;">📊 রিপোর্ট</h2>
                     <div class="stats-grid" id="statsContainer"></div>
+                    
+                    <h3 style="margin: 30px 0 20px; color: #2a5298;">স্ট্যাটাস অনুযায়ী পার্সেল</h3>
+                    <div class="grid-3" id="statusBreakdown"></div>
                 </div>
             `;
 
@@ -732,6 +926,8 @@
             e.preventDefault();
             
             const id = 'CT' + String(counter).padStart(6, '0');
+            const paymentStatus = document.querySelector('input[name="paymentStatus"]:checked').value;
+            
             const parcel = {
                 id: id,
                 senderName: document.getElementById('senderName').value,
@@ -740,6 +936,7 @@
                 receiverPhone: document.getElementById('receiverPhone').value,
                 destination: document.getElementById('destination').value,
                 deliveryCharge: parseFloat(document.getElementById('deliveryCharge').value),
+                paymentStatus: paymentStatus,
                 description: document.getElementById('description').value,
                 date: new Date().toLocaleDateString('bn-BD'),
                 timestamp: Date.now(),
@@ -760,34 +957,124 @@
                     counter++;
                     window.dbSet(window.dbRef(window.db, 'counter'), counter);
                     
-                    // Generate QR
-                    const qrDiv = document.getElementById('qr-code');
-                    qrDiv.innerHTML = '';
-                    new QRCode(qrDiv, {
-                        text: id,
-                        width: 200,
-                        height: 200,
-                        colorDark: "#2a5298",
-                        colorLight: "#ffffff"
-                    });
-                    
-                    document.getElementById('parcel-id-text').textContent = id;
-                    document.getElementById('parcelForm').classList.add('hidden');
-                    document.getElementById('receiptDiv').classList.remove('hidden');
-                    
+                    showInvoice(parcel);
                     alert('✅ পার্সেল সফলভাবে যোগ হয়েছে!');
                 });
             });
         }
 
+        function showInvoice(parcel) {
+            const qrDiv = document.getElementById('qr-code');
+            qrDiv.innerHTML = '';
+            new QRCode(qrDiv, {
+                text: parcel.id,
+                width: 200,
+                height: 200,
+                colorDark: "#2a5298",
+                colorLight: "#ffffff"
+            });
+            
+            document.getElementById('invoiceDate').textContent = parcel.date;
+            document.getElementById('invoice-parcel-id').textContent = 'পার্সেল নং: ' + parcel.id;
+            document.getElementById('inv-sender-name').textContent = parcel.senderName;
+            document.getElementById('inv-sender-phone').textContent = parcel.senderPhone;
+            document.getElementById('inv-receiver-name').textContent = parcel.receiverName;
+            document.getElementById('inv-receiver-phone').textContent = parcel.receiverPhone;
+            document.getElementById('inv-destination').textContent = parcel.destination;
+            document.getElementById('inv-description').textContent = parcel.description || 'N/A';
+            document.getElementById('inv-status').textContent = 'পেন্ডিং';
+            document.getElementById('inv-charge').textContent = parcel.deliveryCharge + ' টাকা';
+            document.getElementById('inv-payment-status').textContent = parcel.paymentStatus === 'paid' ? '✅ পরিশোধিত' : '⏳ বাকি আছে';
+            
+            document.getElementById('parcelForm').classList.add('hidden');
+            document.getElementById('invoiceDiv').classList.remove('hidden');
+        }
+
+        function printInvoice() {
+            window.print();
+        }
+
         function resetForm() {
             document.getElementById('parcelForm').reset();
             document.getElementById('parcelForm').classList.remove('hidden');
-            document.getElementById('receiptDiv').classList.add('hidden');
+            document.getElementById('invoiceDiv').classList.add('hidden');
             document.getElementById('qr-code').innerHTML = '';
         }
 
-        // Scanner Interface
+        function searchParcel() {
+            const searchTerm = document.getElementById('searchInput').value.trim().toUpperCase();
+            const resultDiv = document.getElementById('searchResult');
+            
+            if (!searchTerm) {
+                resultDiv.innerHTML = '';
+                return;
+            }
+            
+            const found = parcels.find(p => p.id === searchTerm);
+            
+            if (found) {
+                displayParcelDetails(found, resultDiv);
+            } else {
+                resultDiv.innerHTML = '<div class="no-data">❌ পার্সেল খুঁজে পাওয়া যায়নি</div>';
+            }
+        }
+
+        function displayParcelDetails(parcel, container) {
+            const statusText = {
+                'pending': 'পেন্ডিং',
+                'loaded': 'গাড়িতে তোলা',
+                'unloaded': 'গাড়ি থেকে নামানো',
+                'delivered': 'ডেলিভার্ড'
+            }[parcel.status] || 'পেন্ডিং';
+
+            const paymentText = parcel.paymentStatus === 'paid' ? '✅ পরিশোধিত' : '⏳ বাকি আছে';
+
+            container.innerHTML = `
+                <div class="parcel-card">
+                    <div class="parcel-id">${parcel.id}</div>
+                    <div style="margin-bottom: 15px;">
+                        <span class="status-badge status-${parcel.status}">${statusText}</span>
+                        <span class="status-badge payment-${parcel.paymentStatus}">${paymentText}</span>
+                    </div>
+                    <div class="grid-2" style="font-size: 0.95em;">
+                        <div><strong>প্রেরক:</strong> ${parcel.senderName} (${parcel.senderPhone})</div>
+                        <div><strong>প্রাপক:</strong> ${parcel.receiverName} (${parcel.receiverPhone})</div>
+                        <div><strong>গন্তব্য:</strong> ${parcel.destination}</div>
+                        <div><strong>চার্জ:</strong> ${parcel.deliveryCharge} টাকা</div>
+                        <div><strong>তারিখ:</strong> ${parcel.date}</div>
+                        <div><strong>পেমেন্ট:</strong> ${paymentText}</div>
+                    </div>
+                    ${parcel.description ? '<div style="margin-top: 10px;"><strong>বিবরণ:</strong> ' + parcel.description + '</div>' : ''}
+                    <div style="margin-top: 15px;">
+                        ${parcel.paymentStatus === 'due' ? 
+                            '<button class="btn btn-success" onclick="markAsPaid(\'' + parcel.key + '\')">💵 পরিশোধিত করুন</button>' : ''}
+                        <button class="btn btn-info" onclick="showParcelInvoice(\'' + parcel.key + '\')">📄 Invoice দেখুন</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function markAsPaid(key) {
+            if (confirm('এই পার্সেলটি পরিশোধিত করবেন?')) {
+                waitForFirebase(() => {
+                    const ref = window.dbRef(window.db, 'parcels/' + key);
+                    window.dbUpdate(ref, { paymentStatus: 'paid' }).then(() => {
+                        alert('✅ পেমেন্ট স্ট্যাটাস আপডেট হয়েছে!');
+                    });
+                });
+            }
+        }
+
+        function showParcelInvoice(key) {
+            const parcel = parcels.find(p => p.key === key);
+            if (parcel) {
+                showTab('new-parcel');
+                setTimeout(() => {
+                    showInvoice(parcel);
+                }, 100);
+            }
+        }
+
         function loadScannerInterface(isDelivery) {
             document.getElementById('contentArea').innerHTML = `
                 <div id="scanner" class="tab-content active">
@@ -811,7 +1098,6 @@
             `;
         }
 
-        // Scanner Functions
         function startScanning() {
             document.getElementById('reader').classList.remove('hidden');
             document.getElementById('startScanBtn').classList.add('hidden');
@@ -867,11 +1153,12 @@
         function displayScannedParcel(parcel) {
             const statusText = {
                 'pending': 'পেন্ডিং',
-                'loaded': 'গাড়িতে তোলা হয়েছে',
-                'unloaded': 'গাড়ি থেকে নামানো হয়েছে',
+                'loaded': 'গাড়িতে তোলা',
+                'unloaded': 'গাড়ি থেকে নামানো',
                 'delivered': 'ডেলিভার্ড'
             }[parcel.status] || 'পেন্ডিং';
 
+            const paymentText = parcel.paymentStatus === 'paid' ? '✅ পরিশোধিত' : '⏳ বাকি';
             const isDelivery = currentUser.role === 'delivery';
             
             document.getElementById('scannedParcelInfo').innerHTML = `
@@ -879,6 +1166,7 @@
                     <div class="parcel-id">${parcel.id}</div>
                     <div style="margin-bottom: 15px;">
                         <span class="status-badge status-${parcel.status}">${statusText}</span>
+                        <span class="status-badge payment-${parcel.paymentStatus}">${paymentText}</span>
                     </div>
                     <div class="grid-2" style="font-size: 0.95em;">
                         <div><strong>প্রেরক:</strong> ${parcel.senderName}</div>
@@ -889,7 +1177,7 @@
                     <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
                         ${!isDelivery ? `
                             <button class="btn btn-success" onclick="updateStatus('loaded')" style="flex: 1;">✅ গাড়িতে তোলা</button>
-                            <button class="btn btn-warning" onclick="updateStatus('unloaded')" style="flex: 1;">📦 গাড়ি থেকে নামানো</button>
+                            <button class="btn btn-warning" onclick="updateStatus('unloaded')" style="flex: 1;">📦 নামানো</button>
                         ` : ''}
                         <button class="btn btn-primary" onclick="updateStatus('delivered')" style="flex: 1;">🎉 ডেলিভার্ড</button>
                     </div>
@@ -932,7 +1220,6 @@
             });
         }
 
-        // Parcel List
         function updateParcelList() {
             const container = document.getElementById('parcelListContainer');
             if (!container) return;
@@ -947,15 +1234,18 @@
                 const statusText = {
                     'pending': 'পেন্ডিং',
                     'loaded': 'গাড়িতে তোলা',
-                    'unloaded': 'গাড়ি থেকে নামানো',
+                    'unloaded': 'নামানো',
                     'delivered': 'ডেলিভার্ড'
                 }[p.status] || 'পেন্ডিং';
+
+                const paymentText = p.paymentStatus === 'paid' ? '✅ পরিশোধিত' : '⏳ বাকি';
 
                 html += `
                     <div class="parcel-card">
                         <div class="parcel-id">${p.id}</div>
                         <div style="margin-bottom: 10px;">
                             <span class="status-badge status-${p.status}">${statusText}</span>
+                            <span class="status-badge payment-${p.paymentStatus}">${paymentText}</span>
                         </div>
                         <div class="grid-2" style="font-size: 0.95em;">
                             <div><strong>প্রেরক:</strong> ${p.senderName} (${p.senderPhone})</div>
@@ -963,9 +1253,13 @@
                             <div><strong>গন্তব্য:</strong> ${p.destination}</div>
                             <div><strong>চার্জ:</strong> ${p.deliveryCharge} টাকা</div>
                             <div><strong>তারিখ:</strong> ${p.date}</div>
+                            <div><strong>পেমেন্ট:</strong> ${paymentText}</div>
                         </div>
-                        <div style="margin-top: 15px;">
-                            <button class="btn btn-danger" onclick="deleteParcel('${p.key}')">🗑️ মুছুন</button>
+                        <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                            ${p.paymentStatus === 'due' ? 
+                                '<button class="btn btn-success" onclick="markAsPaid(\'' + p.key + '\')">💵 পরিশোধিত</button>' : ''}
+                            <button class="btn btn-info" onclick="showParcelInvoice(\'' + p.key + '\')">📄 Invoice</button>
+                            <button class="btn btn-danger" onclick="deleteParcel(\'' + p.key + '\')">🗑️ মুছুন</button>
                         </div>
                     </div>
                 `;
@@ -983,9 +1277,76 @@
             }
         }
 
-        // Reports
+        function updateAccounts() {
+            const container = document.getElementById('accountsStats');
+            const paymentContainer = document.getElementById('paymentBreakdown');
+            const destContainer = document.getElementById('destinationAccounts');
+            if (!container) return;
+
+            const total = parcels.reduce((sum, p) => sum + p.deliveryCharge, 0);
+            const paid = parcels.filter(p => p.paymentStatus === 'paid').reduce((sum, p) => sum + p.deliveryCharge, 0);
+            const due = parcels.filter(p => p.paymentStatus === 'due').reduce((sum, p) => sum + p.deliveryCharge, 0);
+            const paidCount = parcels.filter(p => p.paymentStatus === 'paid').length;
+            const dueCount = parcels.filter(p => p.paymentStatus === 'due').length;
+
+            container.innerHTML = `
+                <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                    <h3>${total}</h3>
+                    <p>মোট আয় (টাকা)</p>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);">
+                    <h3>${paid}</h3>
+                    <p>পরিশোধিত (টাকা)</p>
+                </div>
+                <div class="stat-card" style="background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);">
+                    <h3>${due}</h3>
+                    <p>বাকি আছে (টাকা)</p>
+                </div>
+            `;
+
+            paymentContainer.innerHTML = `
+                <div class="parcel-card" style="background: #d1e7dd;">
+                    <h3 style="color: #0f5132; margin-bottom: 15px;">✅ পরিশোধিত পার্সেল</h3>
+                    <div style="font-size: 2em; font-weight: bold; color: #0f5132;">${paidCount} টি</div>
+                    <div style="margin-top: 10px; font-size: 1.2em;">মোট: ${paid} টাকা</div>
+                </div>
+                <div class="parcel-card" style="background: #f8d7da;">
+                    <h3 style="color: #842029; margin-bottom: 15px;">⏳ বাকি পার্সেল</h3>
+                    <div style="font-size: 2em; font-weight: bold; color: #842029;">${dueCount} টি</div>
+                    <div style="margin-top: 10px; font-size: 1.2em;">মোট: ${due} টাকা</div>
+                </div>
+            `;
+
+            const destinations = ['ফেনী', 'ছাগলনাইয়া', 'বসুরহাট', 'দাগনভূঞা', 'মুরাদপুর'];
+            let destHtml = '';
+            
+            destinations.forEach(dest => {
+                const destParcels = parcels.filter(p => p.destination === dest);
+                const destTotal = destParcels.reduce((sum, p) => sum + p.deliveryCharge, 0);
+                const destPaid = destParcels.filter(p => p.paymentStatus === 'paid').reduce((sum, p) => sum + p.deliveryCharge, 0);
+                const destDue = destParcels.filter(p => p.paymentStatus === 'due').reduce((sum, p) => sum + p.deliveryCharge, 0);
+                
+                if (destParcels.length > 0) {
+                    destHtml += `
+                        <div class="parcel-card">
+                            <h3 style="color: #2a5298; margin-bottom: 15px;">${dest}</h3>
+                            <div class="grid-3" style="font-size: 0.95em;">
+                                <div><strong>মোট পার্সেল:</strong> ${destParcels.length} টি</div>
+                                <div><strong>মোট আয়:</strong> ${destTotal} টাকা</div>
+                                <div><strong>পরিশোধিত:</strong> ${destPaid} টাকা</div>
+                                <div><strong>বাকি:</strong> ${destDue} টাকা</div>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+            
+            destContainer.innerHTML = destHtml || '<div class="no-data">কোনো ডেটা নেই</div>';
+        }
+
         function updateReports() {
             const container = document.getElementById('statsContainer');
+            const statusContainer = document.getElementById('statusBreakdown');
             if (!container) return;
 
             const total = parcels.length;
@@ -993,7 +1354,6 @@
             const loaded = parcels.filter(p => p.status === 'loaded').length;
             const unloaded = parcels.filter(p => p.status === 'unloaded').length;
             const delivered = parcels.filter(p => p.status === 'delivered').length;
-            const revenue = parcels.reduce((sum, p) => sum + p.deliveryCharge, 0);
 
             container.innerHTML = `
                 <div class="stat-card">
@@ -1016,14 +1376,16 @@
                     <h3>${delivered}</h3>
                     <p>ডেলিভার্ড</p>
                 </div>
-                <div class="stat-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
-                    <h3>${revenue}</h3>
-                    <p>মোট আয় (টাকা)</p>
-                </div>
+            `;
+
+            statusContainer.innerHTML = `
+                <div class="parcel-card"><strong>পেন্ডিং:</strong> ${pending} টি</div>
+                <div class="parcel-card"><strong>গাড়িতে তোলা:</strong> ${loaded} টি</div>
+                <div class="parcel-card"><strong>নামানো:</strong> ${unloaded} টি</div>
+                <div class="parcel-card"><strong>ডেলিভার্ড:</strong> ${delivered} টি</div>
             `;
         }
 
-        // Check login on page load
         window.onload = function() {
             const savedUser = localStorage.getItem('chishtiyaCurrentUser');
             if (savedUser) {
