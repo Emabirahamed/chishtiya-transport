@@ -6,7 +6,6 @@
     <title>চিশতিয়া ট্রান্সপোর্ট - রিয়েল-টাইম সিস্টেম</title>
     
     <!-- Firebase SDK v9 (Modular) -->
-    import { initializeApp } from "firebase/app";
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js';
         import { getDatabase, ref, set, get, update, remove, onValue, push } from 'https://www.gstatic.com/firebasejs/9.22.0/firebase-database.js';
@@ -14,11 +13,12 @@
         // Your Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyC2BMeBAU-7tLrBw0dKehAVix6mT9C4lWI",
-  authDomain: "chishtiya-transport.firebaseapp.com",
-  projectId: "chishtiya-transport",
-  storageBucket: "chishtiya-transport.firebasestorage.app",
-  messagingSenderId: "796543197916",
-  appId: "1:796543197916:web:64a0e89d68280986a60a19"
+            authDomain: "chishtiya-transport.firebaseapp.com",
+            databaseURL: "https://chishtiya-transport-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "chishtiya-transport",
+            storageBucket: "chishtiya-transport.firebasestorage.app",
+            messagingSenderId: "796543197916",
+            appId: "1:796543197916:web:64a0e89d68280986a60a19"
         };
 
         // Initialize Firebase
