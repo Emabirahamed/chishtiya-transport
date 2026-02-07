@@ -3,47 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>চিশতিয়া ট্রান্সপোর্ট - মাল্টি ইউজার সিস্টেম</title>
+    <title>চিশতিয়া ট্রান্সপোর্ট - রিয়েল-টাইম সিস্টেম</title>
+    
+    <!-- Firebase v10 SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, set, onValue, push, update, remove } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyC2BMeBAU-7tLrBw0dKehAVix6mT9C4lWI",
+            authDomain: "chishtiya-transport.firebaseapp.com",
+            databaseURL: "https://chishtiya-transport-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "chishtiya-transport",
+            storageBucket: "chishtiya-transport.firebasestorage.app",
+            messagingSenderId: "796543197916",
+            appId: "1:796543197916:web:64a0e89d68280986a60a19"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        
+        window.db = db;
+        window.dbRef = ref;
+        window.dbSet = set;
+        window.dbOnValue = onValue;
+        window.dbPush = push;
+        window.dbUpdate = update;
+        window.dbRemove = remove;
+        window.firebaseReady = true;
+        
+        console.log('✅ Firebase Connected Successfully!');
+    </script>
+    
+    <!-- QR Code Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+    
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
         body {
             font-family: 'Noto Sans Bengali', 'SolaimanLipi', Arial, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
         }
-
+        
+        /* Connection Status */
+        .status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            z-index: 1000;
+        }
+        
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #dc3545;
+        }
+        
+        .dot.online {
+            background: #28a745;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        /* Login Screen */
         .login-container {
-            max-width: 400px;
-            margin: 100px auto;
+            max-width: 450px;
+            margin: 80px auto;
             background: white;
             border-radius: 20px;
             padding: 40px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-
+        
         .login-header {
             text-align: center;
             margin-bottom: 30px;
         }
-
+        
         .login-header h1 {
             color: #2a5298;
             font-size: 2em;
             margin-bottom: 10px;
         }
-
-        .login-header p {
-            color: #6c757d;
+        
+        .role-selector {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
         }
-
+        
+        .role-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px 15px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 3px solid transparent;
+        }
+        
+        .role-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        
+        .role-card.selected {
+            border-color: #fff;
+        }
+        
+        .role-card h3 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .role-card p {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+        
+        /* Main Container */
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -53,100 +149,86 @@
             overflow: hidden;
             display: none;
         }
-
+        
         .header {
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: white;
-            padding: 30px;
+            padding: 25px 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
         }
-
-        .header-left h1 {
-            font-size: 2em;
-            margin-bottom: 5px;
+        
+        .header h1 {
+            font-size: 1.8em;
         }
-
-        .header-left p {
-            opacity: 0.9;
-        }
-
-        .header-right {
-            text-align: right;
-        }
-
+        
         .user-info {
             background: rgba(255,255,255,0.2);
-            padding: 10px 20px;
+            padding: 8px 20px;
             border-radius: 10px;
-            margin-bottom: 10px;
         }
-
-        .user-role {
-            font-size: 0.9em;
-            opacity: 0.9;
-        }
-
+        
+        /* Tabs */
         .tabs {
             display: flex;
             background: #f8f9fa;
             border-bottom: 2px solid #dee2e6;
             overflow-x: auto;
         }
-
+        
         .tab {
             flex: 1;
-            padding: 20px;
+            padding: 18px;
             text-align: center;
             cursor: pointer;
             border: none;
             background: none;
-            font-size: 1.1em;
+            font-size: 1em;
             font-weight: 600;
             color: #495057;
             transition: all 0.3s;
-            white-space: nowrap;
             display: none;
         }
-
+        
         .tab.visible {
             display: block;
         }
-
+        
         .tab:hover {
             background: #e9ecef;
         }
-
+        
         .tab.active {
             background: white;
             color: #2a5298;
             border-bottom: 3px solid #2a5298;
         }
-
+        
         .content {
             padding: 30px;
         }
-
+        
         .tab-content {
             display: none;
         }
-
+        
         .tab-content.active {
             display: block;
             animation: fadeIn 0.3s;
         }
-
+        
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
         }
-
+        
+        /* Form Elements */
         .form-group {
             margin-bottom: 20px;
         }
-
+        
         label {
             display: block;
             margin-bottom: 8px;
@@ -154,23 +236,30 @@
             color: #2c3e50;
             font-size: 1.05em;
         }
-
+        
         input, select, textarea {
             width: 100%;
             padding: 12px 15px;
             border: 2px solid #e0e0e0;
             border-radius: 8px;
             font-size: 1em;
-            transition: all 0.3s;
             font-family: 'Noto Sans Bengali', Arial, sans-serif;
+            transition: border-color 0.3s;
         }
-
+        
         input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #2a5298;
             box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
         }
-
+        
+        .grid-2 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+        
+        /* Buttons */
         .btn {
             padding: 14px 30px;
             border: none;
@@ -178,47 +267,48 @@
             font-size: 1.1em;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
             font-family: 'Noto Sans Bengali', Arial, sans-serif;
+            transition: all 0.3s;
         }
-
+        
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
         }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-        }
-
+        
         .btn-success {
             background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
             color: white;
         }
-
+        
         .btn-danger {
             background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%);
             color: white;
         }
-
-        .btn-info {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-
+        
         .btn-warning {
             background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
             color: white;
         }
-
+        
+        .btn-info {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
         .btn-logout {
             background: rgba(255,255,255,0.3);
             color: white;
             padding: 10px 20px;
             font-size: 0.9em;
         }
-
+        
+        /* Parcel Card */
         .parcel-card {
             background: #f8f9fa;
             border: 2px solid #e9ecef;
@@ -227,44 +317,19 @@
             margin-bottom: 15px;
             transition: all 0.3s;
         }
-
+        
         .parcel-card:hover {
             box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             transform: translateX(5px);
         }
-
+        
         .parcel-id {
             font-size: 1.3em;
             font-weight: bold;
             color: #2a5298;
             margin-bottom: 10px;
         }
-
-        .parcel-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 10px;
-            margin-top: 10px;
-        }
-
-        .info-item {
-            padding: 8px;
-            background: white;
-            border-radius: 5px;
-        }
-
-        .info-label {
-            font-weight: 600;
-            color: #6c757d;
-            font-size: 0.9em;
-        }
-
-        .info-value {
-            color: #2c3e50;
-            font-size: 1.05em;
-            margin-top: 3px;
-        }
-
+        
         .status-badge {
             display: inline-block;
             padding: 6px 15px;
@@ -272,604 +337,332 @@
             font-size: 0.9em;
             font-weight: 600;
         }
-
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-loaded {
-            background: #cfe2ff;
-            color: #084298;
-        }
-
-        .status-in-transit {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .status-unloaded {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-delivered {
-            background: #d1e7dd;
-            color: #0f5132;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
+        
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-loaded { background: #cfe2ff; color: #084298; }
+        .status-unloaded { background: #d4edda; color: #155724; }
+        .status-delivered { background: #d1e7dd; color: #0f5132; }
+        
+        /* QR Code */
+        .qr-container {
+            text-align: center;
             padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .stat-card h3 {
-            font-size: 2.5em;
-            margin-bottom: 10px;
-        }
-
-        .stat-card p {
-            font-size: 1.1em;
-            opacity: 0.9;
-        }
-
-        .receipt {
-            background: white;
-            padding: 30px;
-            border: 2px solid #2a5298;
-            border-radius: 10px;
-            margin-top: 20px;
-        }
-
-        .receipt-header {
-            text-align: center;
-            border-bottom: 2px solid #2a5298;
-            padding-bottom: 20px;
-            margin-bottom: 20px;
-        }
-
-        .receipt-header h2 {
-            color: #2a5298;
-            font-size: 2em;
-            margin-bottom: 10px;
-        }
-
-        .receipt-body {
-            margin: 20px 0;
-        }
-
-        .receipt-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px dashed #ddd;
-        }
-
-        .receipt-label {
-            font-weight: 600;
-            color: #6c757d;
-        }
-
-        .receipt-value {
-            color: #2c3e50;
-            font-weight: 600;
-        }
-
-        .qr-code-container {
-            text-align: center;
-            margin: 20px 0;
-            padding: 20px;
             background: #f8f9fa;
             border-radius: 10px;
+            margin: 20px 0;
         }
-
+        
         #qr-code {
             display: inline-block;
             padding: 15px;
             background: white;
             border-radius: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
-
+        
+        /* Scanner */
         .scanner-container {
             background: #f8f9fa;
             border-radius: 10px;
             padding: 20px;
             margin-bottom: 20px;
         }
-
+        
         #reader {
             border-radius: 10px;
             overflow: hidden;
             max-width: 500px;
             margin: 0 auto;
         }
-
-        .search-box {
-            position: relative;
-            margin-bottom: 20px;
-        }
-
-        .search-box input {
-            padding-left: 45px;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
-            font-size: 1.2em;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-
-        .action-buttons .btn {
-            flex: 1;
-            min-width: 120px;
-        }
-
-        .grid-2 {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .no-data {
-            text-align: center;
-            padding: 40px;
-            color: #6c757d;
-            font-size: 1.2em;
-        }
-
-        .tracking-timeline {
-            margin-top: 20px;
-            padding: 15px;
-            background: white;
-            border-radius: 8px;
-        }
-
-        .timeline-item {
-            display: flex;
-            align-items: flex-start;
-            margin-bottom: 15px;
-            padding-bottom: 15px;
-            border-bottom: 1px dashed #dee2e6;
-        }
-
-        .timeline-item:last-child {
-            border-bottom: none;
-        }
-
-        .timeline-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.2em;
-            margin-right: 15px;
-            flex-shrink: 0;
-        }
-
-        .timeline-icon.created {
-            background: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .timeline-icon.loaded {
-            background: #cfe2ff;
-            color: #084298;
-        }
-
-        .timeline-icon.unloaded {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .timeline-icon.delivered {
-            background: #d1e7dd;
-            color: #0f5132;
-        }
-
-        .timeline-content {
-            flex: 1;
-        }
-
-        .timeline-title {
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 5px;
-        }
-
-        .timeline-time {
-            font-size: 0.9em;
-            color: #6c757d;
-        }
-
+        
         .scan-result {
             padding: 15px;
             border-radius: 8px;
             margin-top: 15px;
             font-weight: 600;
         }
-
+        
         .scan-success {
             background: #d1e7dd;
             color: #0f5132;
             border: 2px solid #0f5132;
         }
-
+        
         .scan-error {
             background: #f8d7da;
             color: #842029;
             border: 2px solid #842029;
         }
-
-        .role-selector {
+        
+        /* Stats */
+        .stats-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .role-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px 20px;
-            border-radius: 15px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s;
-            border: 3px solid transparent;
-        }
-
-        .role-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
-        .role-card.selected {
-            border-color: #fff;
-        }
-
-        .role-card h3 {
-            font-size: 1.5em;
-            margin-bottom: 10px;
-        }
-
-        .role-card p {
-            font-size: 0.9em;
-            opacity: 0.9;
-        }
-
-        .simple-scanner {
-            background: white;
-            border-radius: 15px;
-            padding: 30px;
-            max-width: 600px;
-            margin: 0 auto;
-        }
-
-        .scanner-title {
-            text-align: center;
-            color: #2a5298;
-            font-size: 2em;
+            gap: 20px;
             margin-bottom: 30px;
         }
-
-        .scanner-buttons {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .big-scan-btn {
-            padding: 30px;
-            font-size: 1.5em;
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
             border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 15px;
+            text-align: center;
         }
-
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            .receipt, .receipt * {
-                visibility: visible;
-            }
-            .receipt {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-            }
-            .btn {
-                display: none;
-            }
+        
+        .stat-card h3 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
         }
-
+        
+        /* Utilities */
+        .hidden { display: none !important; }
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-size: 1.2em;
+        }
+        
+        /* Responsive */
         @media (max-width: 768px) {
-            .header {
-                flex-direction: column;
-                text-align: center;
-            }
-
-            .header-right {
-                text-align: center;
-                margin-top: 15px;
-            }
-
-            .header-left h1 {
-                font-size: 1.5em;
-            }
-            
-            .tab {
-                font-size: 0.9em;
-                padding: 15px 10px;
-            }
-
-            .content {
-                padding: 20px;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .scanner-title {
-                font-size: 1.5em;
-            }
-
-            .big-scan-btn {
-                padding: 20px;
-                font-size: 1.2em;
-            }
+            .header { flex-direction: column; text-align: center; }
+            .header h1 { font-size: 1.5em; }
+            .tab { font-size: 0.9em; padding: 15px 10px; }
+            .content { padding: 20px; }
+            .grid-2 { grid-template-columns: 1fr; }
+        }
+        
+        @media print {
+            body * { visibility: hidden; }
+            .qr-container, .qr-container * { visibility: visible; }
+            .qr-container { position: absolute; left: 0; top: 0; }
         }
     </style>
 </head>
 <body>
+    <!-- Connection Status -->
+    <div class="status">
+        <div class="dot" id="statusDot"></div>
+        <span id="statusText">সংযোগ হচ্ছে...</span>
+    </div>
+
     <!-- Login Screen -->
     <div class="login-container" id="loginScreen">
         <div class="login-header">
             <h1>🚛 চিশতিয়া ট্রান্সপোর্ট</h1>
-            <p>লগইন করুন</p>
+            <p>রিয়েল-টাইম ম্যানেজমেন্ট সিস্টেম</p>
         </div>
-
+        
         <div class="form-group">
             <label>আপনার ভূমিকা নির্বাচন করুন</label>
             <div class="role-selector">
                 <div class="role-card" onclick="selectRole('manager')">
                     <h3>👨‍💼</h3>
-                    <h3>ম্যানেজার</h3>
-                    <p>সব কিছু দেখতে ও পরিচালনা করতে পারবেন</p>
+                    <p>ম্যানেজার</p>
                 </div>
                 <div class="role-card" onclick="selectRole('scanner')">
                     <h3>📦</h3>
-                    <h3>লেবার</h3>
-                    <p>পার্সেল তোলা ও নামানোর কাজ</p>
+                    <p>লেবার</p>
                 </div>
                 <div class="role-card" onclick="selectRole('delivery')">
                     <h3>🏍️</h3>
-                    <h3>ডেলিভারি বয়</h3>
-                    <p>পার্সেল ডেলিভার করার কাজ</p>
+                    <p>ডেলিভারি বয়</p>
                 </div>
             </div>
         </div>
-
-        <div class="form-group" style="margin-top: 30px;">
+        
+        <div class="form-group">
             <label>আপনার নাম (ঐচ্ছিক)</label>
             <input type="text" id="userName" placeholder="নাম লিখুন...">
         </div>
-
-        <button class="btn btn-primary" style="width: 100%; margin-top: 20px;" onclick="login()">
+        
+        <button class="btn btn-primary" style="width: 100%;" onclick="login()">
             ✅ লগইন করুন
         </button>
     </div>
 
-    <!-- Main Application -->
+    <!-- Main App -->
     <div class="container" id="mainApp">
         <div class="header">
-            <div class="header-left">
+            <div>
                 <h1>🚛 চিশতিয়া ট্রান্সপোর্ট</h1>
-                <p id="systemRole">ম্যানেজমেন্ট সিস্টেম</p>
+                <p>রিয়েল-টাইম সিস্টেম</p>
             </div>
-            <div class="header-right">
+            <div>
                 <div class="user-info">
-                    <div style="font-size: 1.1em; font-weight: bold;" id="currentUserName">ব্যবহারকারী</div>
-                    <div class="user-role" id="currentUserRole">ম্যানেজার</div>
+                    <div style="font-weight: bold;" id="currentUserName">ব্যবহারকারী</div>
+                    <div style="font-size: 0.9em; opacity: 0.9;" id="currentUserRole">ম্যানেজার</div>
                 </div>
                 <button class="btn btn-logout" onclick="logout()">🚪 লগআউট</button>
             </div>
         </div>
 
-        <div class="tabs" id="tabsContainer">
+        <div class="tabs">
             <button class="tab" id="tab-new-parcel" onclick="showTab('new-parcel')">📦 নতুন পার্সেল</button>
             <button class="tab" id="tab-scanner" onclick="showTab('scanner')">📷 স্ক্যান করুন</button>
             <button class="tab" id="tab-parcel-list" onclick="showTab('parcel-list')">📋 পার্সেল তালিকা</button>
             <button class="tab" id="tab-reports" onclick="showTab('reports')">📊 রিপোর্ট</button>
-            <button class="tab" id="tab-settings" onclick="showTab('settings')">⚙️ সেটিংস</button>
         </div>
 
         <div class="content" id="contentArea">
-            <!-- Content will be loaded based on user role -->
+            <!-- Content loaded dynamically -->
         </div>
     </div>
 
     <script>
         // Global variables
+        let currentUser = { role: null, name: null };
+        let selectedRole = null;
+        let counter = 1;
         let parcels = [];
-        let parcelCounter = 1;
         let html5QrCode = null;
         let currentScannedParcelId = null;
-        let currentUser = {
-            role: null,
-            name: null
-        };
-        let selectedRole = null;
 
-        // Load data from localStorage on page load
-        window.onload = function() {
-            loadData();
-            checkLogin();
-        };
-
-        // Check if user is logged in
-        function checkLogin() {
-            const savedUser = localStorage.getItem('chishtiyaCurrentUser');
-            if (savedUser) {
-                currentUser = JSON.parse(savedUser);
-                showMainApp();
-            }
+        // Wait for Firebase
+        function waitForFirebase(callback) {
+            if (window.firebaseReady) callback();
+            else setTimeout(() => waitForFirebase(callback), 100);
         }
 
-        // Select role during login
+        // Initialize Firebase listeners
+        function initFirebase() {
+            waitForFirebase(() => {
+                // Connection status
+                const connRef = window.dbRef(window.db, '.info/connected');
+                window.dbOnValue(connRef, (snap) => {
+                    const online = snap.val() === true;
+                    document.getElementById('statusDot').className = online ? 'dot online' : 'dot';
+                    document.getElementById('statusText').textContent = online ? 'অনলাইন' : 'অফলাইন';
+                });
+
+                // Counter
+                const counterRef = window.dbRef(window.db, 'counter');
+                window.dbOnValue(counterRef, (snap) => {
+                    if (snap.exists()) counter = snap.val();
+                });
+
+                // Parcels
+                const parcelsRef = window.dbRef(window.db, 'parcels');
+                window.dbOnValue(parcelsRef, (snap) => {
+                    parcels = [];
+                    if (snap.exists()) {
+                        snap.forEach(child => {
+                            parcels.push({ key: child.key, ...child.val() });
+                        });
+                    }
+                    if (currentUser.role === 'manager') {
+                        updateParcelList();
+                        updateReports();
+                    }
+                });
+            });
+        }
+
+        // Login
         function selectRole(role) {
             selectedRole = role;
-            // Remove selected class from all cards
-            document.querySelectorAll('.role-card').forEach(card => {
-                card.classList.remove('selected');
-            });
-            // Add selected class to clicked card
+            document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
             event.target.closest('.role-card').classList.add('selected');
         }
 
-        // Login function
         function login() {
             if (!selectedRole) {
                 alert('অনুগ্রহ করে একটি ভূমিকা নির্বাচন করুন');
                 return;
             }
 
-            const userName = document.getElementById('userName').value.trim() || getRoleDisplayName(selectedRole);
+            const roleNames = { 'manager': 'ম্যানেজার', 'scanner': 'লেবার', 'delivery': 'ডেলিভারি বয়' };
+            const userName = document.getElementById('userName').value.trim() || roleNames[selectedRole];
             
-            currentUser = {
-                role: selectedRole,
-                name: userName
-            };
-
+            currentUser = { role: selectedRole, name: userName };
             localStorage.setItem('chishtiyaCurrentUser', JSON.stringify(currentUser));
+            
             showMainApp();
         }
 
-        // Logout function
         function logout() {
             if (confirm('আপনি কি লগআউট করতে চান?')) {
                 localStorage.removeItem('chishtiyaCurrentUser');
                 currentUser = { role: null, name: null };
                 document.getElementById('loginScreen').style.display = 'block';
                 document.getElementById('mainApp').style.display = 'none';
-                if (html5QrCode) {
-                    stopScanning();
-                }
+                if (html5QrCode) stopScanning();
             }
         }
 
-        // Get role display name
-        function getRoleDisplayName(role) {
-            const roleNames = {
-                'manager': 'ম্যানেজার',
-                'scanner': 'লেবার',
-                'delivery': 'ডেলিভারি বয়'
-            };
-            return roleNames[role] || 'ব্যবহারকারী';
-        }
-
-        // Show main app based on user role
         function showMainApp() {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
             
+            const roleNames = { 'manager': 'ম্যানেজার', 'scanner': 'লেবার', 'delivery': 'ডেলিভারি বয়' };
             document.getElementById('currentUserName').textContent = currentUser.name;
-            document.getElementById('currentUserRole').textContent = getRoleDisplayName(currentUser.role);
+            document.getElementById('currentUserRole').textContent = roleNames[currentUser.role];
             
+            initFirebase();
             setupUIForRole(currentUser.role);
         }
 
-        // Setup UI based on user role
         function setupUIForRole(role) {
             const tabs = {
-                'manager': ['new-parcel', 'scanner', 'parcel-list', 'reports', 'settings'],
+                'manager': ['new-parcel', 'scanner', 'parcel-list', 'reports'],
                 'scanner': ['scanner'],
                 'delivery': ['scanner']
             };
 
-            // Hide all tabs first
-            document.querySelectorAll('.tab').forEach(tab => {
-                tab.classList.remove('visible', 'active');
-            });
-
-            // Show only allowed tabs
-            const allowedTabs = tabs[role] || [];
-            allowedTabs.forEach(tabName => {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('visible', 'active'));
+            (tabs[role] || []).forEach(tabName => {
                 const tab = document.getElementById('tab-' + tabName);
-                if (tab) {
-                    tab.classList.add('visible');
-                }
+                if (tab) tab.classList.add('visible');
             });
 
-            // Load appropriate content
             if (role === 'manager') {
                 loadManagerInterface();
                 showTab('new-parcel');
-            } else if (role === 'scanner') {
-                loadScannerInterface('scanner');
-                showTab('scanner');
-            } else if (role === 'delivery') {
-                loadScannerInterface('delivery');
+            } else {
+                loadScannerInterface(role === 'delivery');
                 showTab('scanner');
             }
         }
 
-        // Load Manager Interface (Full System)
+        function showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            
+            const tab = document.getElementById(tabName);
+            if (tab) tab.classList.add('active');
+            
+            const btn = document.getElementById('tab-' + tabName);
+            if (btn) btn.classList.add('active');
+            
+            if (tabName !== 'scanner' && html5QrCode) stopScanning();
+            
+            if (tabName === 'parcel-list') updateParcelList();
+            else if (tabName === 'reports') updateReports();
+        }
+
+        // Manager Interface
         function loadManagerInterface() {
-            const content = `
-                <!-- New Parcel Tab -->
-                <div id="new-parcel" class="tab-content">
+            document.getElementById('contentArea').innerHTML = `
+                <div id="new-parcel" class="tab-content active">
                     <h2 style="margin-bottom: 25px; color: #2a5298;">নতুন পার্সেল এন্ট্রি</h2>
-                    
                     <form id="parcelForm">
                         <div class="grid-2">
                             <div class="form-group">
                                 <label>প্রেরকের নাম *</label>
                                 <input type="text" id="senderName" required>
                             </div>
-
                             <div class="form-group">
                                 <label>প্রেরকের মোবাইল *</label>
-                                <input type="tel" id="senderPhone" required placeholder="০১XXXXXXXXX">
+                                <input type="tel" id="senderPhone" required>
                             </div>
-
                             <div class="form-group">
                                 <label>প্রাপকের নাম *</label>
                                 <input type="text" id="receiverName" required>
                             </div>
-
                             <div class="form-group">
                                 <label>প্রাপকের মোবাইল *</label>
-                                <input type="tel" id="receiverPhone" required placeholder="০১XXXXXXXXX">
+                                <input type="tel" id="receiverPhone" required>
                             </div>
-
                             <div class="form-group">
                                 <label>গন্তব্য *</label>
                                 <select id="destination" required>
@@ -881,467 +674,173 @@
                                     <option value="মুরাদপুর">মুরাদপুর</option>
                                 </select>
                             </div>
-
                             <div class="form-group">
                                 <label>ডেলিভারি চার্জ (টাকা) *</label>
                                 <input type="number" id="deliveryCharge" required min="0">
                             </div>
                         </div>
-
                         <div class="form-group">
                             <label>পার্সেলের বিবরণ</label>
-                            <textarea id="parcelDescription" rows="3" placeholder="পণ্যের ধরন, ওজন, পরিমাণ ইত্যাদি..."></textarea>
+                            <textarea id="description" rows="3"></textarea>
                         </div>
-
-                        <div class="form-group">
-                            <label>প্রাপকের ঠিকানা</label>
-                            <textarea id="receiverAddress" rows="2"></textarea>
-                        </div>
-
                         <button type="submit" class="btn btn-primary" style="width: 100%;">
-                            ✅ পার্সেল যোগ করুন এবং QR কোড তৈরি করুন
+                            ✅ পার্সেল যোগ করুন এবং QR তৈরি করুন
                         </button>
                     </form>
-
-                    <div id="receiptContainer" style="display: none;">
-                        <div class="receipt" id="receipt">
-                            <div class="receipt-header">
-                                <h2>চিশতিয়া ট্রান্সপোর্ট</h2>
-                                <p>পার্সেল রিসিট</p>
-                                <div style="margin-top: 15px;">
-                                    <strong>তারিখ:</strong> <span id="receiptDate"></span>
-                                </div>
-                            </div>
-
-                            <div class="qr-code-container">
-                                <h3 style="margin-bottom: 15px; color: #2a5298;">QR কোড - স্ক্যান করুন</h3>
-                                <div id="qr-code"></div>
-                                <p style="margin-top: 10px; color: #6c757d;">এই QR কোডটি স্ক্যান করে পার্সেল ট্র্যাক করুন</p>
-                            </div>
-
-                            <div class="receipt-body">
-                                <div class="receipt-row">
-                                    <span class="receipt-label">পার্সেল আইডি:</span>
-                                    <span class="receipt-value" id="receiptParcelId"></span>
-                                </div>
-                                <div class="receipt-row">
-                                    <span class="receipt-label">প্রেরকের নাম:</span>
-                                    <span class="receipt-value" id="receiptSenderName"></span>
-                                </div>
-                                <div class="receipt-row">
-                                    <span class="receipt-label">প্রেরকের মোবাইল:</span>
-                                    <span class="receipt-value" id="receiptSenderPhone"></span>
-                                </div>
-                                <div class="receipt-row">
-                                    <span class="receipt-label">প্রাপকের নাম:</span>
-                                    <span class="receipt-value" id="receiptReceiverName"></span>
-                                </div>
-                                <div class="receipt-row">
-                                    <span class="receipt-label">প্রাপকের মোবাইল:</span>
-                                    <span class="receipt-value" id="receiptReceiverPhone"></span>
-                                </div>
-                                <div class="receipt-row">
-                                    <span class="receipt-label">গন্তব্য:</span>
-                                    <span class="receipt-value" id="receiptDestination"></span>
-                                </div>
-                                <div class="receipt-row">
-                                    <span class="receipt-label">পার্সেলের বিবরণ:</span>
-                                    <span class="receipt-value" id="receiptDescription"></span>
-                                </div>
-                                <div class="receipt-row">
-                                    <span class="receipt-label">প্রাপকের ঠিকানা:</span>
-                                    <span class="receipt-value" id="receiptAddress"></span>
-                                </div>
-                                <div class="receipt-row" style="border-bottom: 2px solid #2a5298; margin-top: 10px; padding-top: 15px;">
-                                    <span class="receipt-label" style="font-size: 1.2em;">ডেলিভারি চার্জ:</span>
-                                    <span class="receipt-value" style="font-size: 1.3em; color: #2a5298;" id="receiptCharge"></span>
-                                </div>
-                            </div>
-
-                            <div style="margin-top: 30px; text-align: center; color: #6c757d;">
-                                <p>ধন্যবাদ! আমাদের সাথে থাকার জন্য</p>
-                                <p style="margin-top: 5px;">যোগাযোগ: চিশতিয়া ট্রান্সপোর্ট</p>
-                            </div>
+                    
+                    <div id="receiptDiv" class="hidden">
+                        <div class="qr-container">
+                            <h3 style="margin-bottom: 15px; color: #2a5298;">QR কোড - স্ক্যান করুন</h3>
+                            <div id="qr-code"></div>
+                            <p id="parcel-id-text" style="margin-top: 15px; font-size: 1.2em; font-weight: bold; color: #2a5298;"></p>
                         </div>
-
-                        <div class="action-buttons">
-                            <button class="btn btn-success" onclick="printReceipt()">🖨️ প্রিন্ট করুন</button>
-                            <button class="btn btn-info" onclick="downloadQR()">📥 QR ডাউনলোড করুন</button>
+                        <div style="text-align: center; margin-top: 20px;">
+                            <button class="btn btn-success" onclick="window.print()">🖨️ প্রিন্ট করুন</button>
                             <button class="btn btn-primary" onclick="resetForm()">➕ নতুন পার্সেল</button>
                         </div>
                     </div>
                 </div>
 
-                <!-- Scanner Tab -->
                 <div id="scanner" class="tab-content">
                     <h2 style="margin-bottom: 25px; color: #2a5298;">QR কোড স্ক্যান করুন</h2>
-                    
                     <div class="scanner-container">
                         <div style="text-align: center; margin-bottom: 20px;">
-                            <button class="btn btn-primary" id="startScanBtn" onclick="startScanning()">
-                                📷 ক্যামেরা চালু করুন
-                            </button>
-                            <button class="btn btn-danger" id="stopScanBtn" onclick="stopScanning()" style="display: none;">
-                                ⏹️ ক্যামেরা বন্ধ করুন
-                            </button>
+                            <button class="btn btn-primary" id="startScanBtn" onclick="startScanning()">📷 ক্যামেরা চালু করুন</button>
+                            <button class="btn btn-danger hidden" id="stopScanBtn" onclick="stopScanning()">⏹️ ক্যামেরা বন্ধ করুন</button>
                         </div>
-                        
-                        <div id="reader" style="display: none;"></div>
-                        
-                        <div id="scanResult" style="display: none;"></div>
+                        <div id="reader" class="hidden"></div>
+                        <div id="scanResult" class="hidden"></div>
                     </div>
-
-                    <div id="scannedParcelInfo" style="display: none;">
-                        <h3 style="margin-bottom: 20px; color: #2a5298;">স্ক্যান করা পার্সেল</h3>
-                        <div id="scannedParcelCard"></div>
-                        
-                        <div class="action-buttons" style="margin-top: 20px;">
-                            <button class="btn btn-success" onclick="markAsLoaded()">
-                                ✅ গাড়িতে তোলা হয়েছে
-                            </button>
-                            <button class="btn btn-warning" onclick="markAsUnloaded()">
-                                📦 গাড়ি থেকে নামানো হয়েছে
-                            </button>
-                            <button class="btn btn-primary" onclick="markAsDelivered()">
-                                🎉 ডেলিভার্ড
-                            </button>
-                        </div>
-                    </div>
+                    <div id="scannedParcelInfo" class="hidden"></div>
                 </div>
 
-                <!-- Parcel List Tab -->
                 <div id="parcel-list" class="tab-content">
                     <h2 style="margin-bottom: 25px; color: #2a5298;">সকল পার্সেল তালিকা</h2>
-                    
-                    <div class="search-box">
-                        <span class="search-icon">🔍</span>
-                        <input type="text" id="searchInput" placeholder="পার্সেল আইডি, নাম বা মোবাইল নম্বর দিয়ে খুঁজুন..." oninput="filterParcels()">
-                    </div>
-
-                    <div id="parcelListContainer">
-                        <div class="no-data">কোনো পার্সেল পাওয়া যায়নি</div>
-                    </div>
+                    <div id="parcelListContainer"></div>
                 </div>
 
-                <!-- Reports Tab -->
                 <div id="reports" class="tab-content">
                     <h2 style="margin-bottom: 25px; color: #2a5298;">রিপোর্ট এবং হিসাব</h2>
-                    
-                    <div class="stats-grid" id="statsContainer">
-                        <!-- Stats will be dynamically added here -->
-                    </div>
-
-                    <h3 style="margin: 30px 0 20px; color: #2a5298;">গন্তব্য অনুযায়ী পার্সেল</h3>
-                    <div id="destinationStats"></div>
-                </div>
-
-                <!-- Settings Tab -->
-                <div id="settings" class="tab-content">
-                    <h2 style="margin-bottom: 25px; color: #2a5298;">সেটিংস</h2>
-                    
-                    <div class="parcel-card">
-                        <h3 style="margin-bottom: 15px; color: #2a5298;">ডেটা ম্যানেজমেন্ট</h3>
-                        <p style="margin-bottom: 20px; color: #6c757d;">আপনার সকল ডেটা এই ব্রাউজারে সংরক্ষিত আছে।</p>
-                        
-                        <div class="action-buttons">
-                            <button class="btn btn-success" onclick="exportData()">📥 ডেটা ডাউনলোড করুন</button>
-                            <button class="btn btn-info" onclick="document.getElementById('importFile').click()">📤 ডেটা আপলোড করুন</button>
-                            <button class="btn btn-danger" onclick="clearAllData()">🗑️ সব ডেটা মুছে ফেলুন</button>
-                        </div>
-                        <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importData(event)">
-                    </div>
-
-                    <div class="parcel-card" style="margin-top: 20px;">
-                        <h3 style="margin-bottom: 15px; color: #2a5298;">তথ্য</h3>
-                        <p><strong>সিস্টেম ভার্সন:</strong> ৩.০ (মাল্টি ইউজার)</p>
-                        <p style="margin-top: 10px;"><strong>মোট পার্সেল:</strong> <span id="totalParcelsInfo">0</span></p>
-                    </div>
+                    <div class="stats-grid" id="statsContainer"></div>
                 </div>
             `;
 
-            document.getElementById('contentArea').innerHTML = content;
-            
-            // Attach form event listener
-            setTimeout(() => {
-                const form = document.getElementById('parcelForm');
-                if (form) {
-                    form.addEventListener('submit', handleParcelFormSubmit);
-                }
-            }, 100);
+            document.getElementById('parcelForm').addEventListener('submit', handleParcelSubmit);
         }
 
-        // Load Scanner Interface (For Scanner/Delivery roles)
-        function loadScannerInterface(role) {
-            const isDelivery = role === 'delivery';
-            const content = `
-                <div id="scanner" class="tab-content active">
-                    <div class="simple-scanner">
-                        <h2 class="scanner-title">${isDelivery ? '🏍️ পার্সেল ডেলিভার করুন' : '📦 পার্সেল স্ক্যান করুন'}</h2>
-                        
-                        <div class="scanner-buttons">
-                            <button class="btn btn-primary big-scan-btn" id="startScanBtn" onclick="startScanning()">
-                                📷 ক্যামেরা চালু করুন
-                            </button>
-                            <button class="btn btn-danger big-scan-btn" id="stopScanBtn" onclick="stopScanning()" style="display: none;">
-                                ⏹️ ক্যামেরা বন্ধ করুন
-                            </button>
-                        </div>
-                        
-                        <div id="reader" style="display: none; margin-top: 20px;"></div>
-                        <div id="scanResult" style="display: none;"></div>
-
-                        <div id="scannedParcelInfo" style="display: none; margin-top: 30px;">
-                            <h3 style="margin-bottom: 20px; color: #2a5298; text-align: center;">স্ক্যান করা পার্সেল</h3>
-                            <div id="scannedParcelCard"></div>
-                            
-                            <div class="scanner-buttons" style="margin-top: 20px;">
-                                ${!isDelivery ? `
-                                    <button class="btn btn-success big-scan-btn" onclick="markAsLoaded()">
-                                        ✅ গাড়িতে তোলা হয়েছে
-                                    </button>
-                                    <button class="btn btn-warning big-scan-btn" onclick="markAsUnloaded()">
-                                        📦 গাড়ি থেকে নামানো হয়েছে
-                                    </button>
-                                ` : ''}
-                                <button class="btn btn-primary big-scan-btn" onclick="markAsDelivered()">
-                                    🎉 ডেলিভার্ড করুন
-                                </button>
-                            </div>
-                        </div>
-
-                        <div style="margin-top: 40px; padding: 20px; background: #e7f3ff; border-radius: 10px; border-left: 4px solid #2a5298;">
-                            <h4 style="color: #2a5298; margin-bottom: 10px;">📱 কীভাবে ব্যবহার করবেন:</h4>
-                            <ol style="margin-left: 20px; line-height: 1.8;">
-                                <li>"ক্যামেরা চালু করুন" বাটনে ক্লিক করুন</li>
-                                <li>পার্সেলের QR কোডটি ক্যামেরার সামনে ধরুন</li>
-                                <li>স্বয়ংক্রিয়ভাবে স্ক্যান হবে</li>
-                                <li>${isDelivery ? 'ডেলিভার্ড বাটনে ক্লিক করুন' : 'যথাযথ বাটনে ক্লিক করে স্ট্যাটাস আপডেট করুন'}</li>
-                            </ol>
-                        </div>
-                    </div>
-                </div>
-            `;
-
-            document.getElementById('contentArea').innerHTML = content;
-        }
-
-        // Load data from localStorage
-        function loadData() {
-            const savedParcels = localStorage.getItem('chishtiyaParcels');
-            const savedCounter = localStorage.getItem('chishtiyaCounter');
-            
-            if (savedParcels) {
-                parcels = JSON.parse(savedParcels);
-            }
-            
-            if (savedCounter) {
-                parcelCounter = parseInt(savedCounter);
-            }
-        }
-
-        // Save data to localStorage
-        function saveData() {
-            localStorage.setItem('chishtiyaParcels', JSON.stringify(parcels));
-            localStorage.setItem('chishtiyaCounter', parcelCounter.toString());
-        }
-
-        // Generate parcel ID
-        function generateParcelId() {
-            const id = 'CT' + String(parcelCounter).padStart(6, '0');
-            parcelCounter++;
-            return id;
-        }
-
-        // Add tracking event
-        function addTrackingEvent(parcelId, eventType, description) {
-            const parcel = parcels.find(p => p.id === parcelId);
-            if (parcel) {
-                if (!parcel.tracking) {
-                    parcel.tracking = [];
-                }
-                parcel.tracking.push({
-                    type: eventType,
-                    description: description,
-                    user: currentUser.name,
-                    timestamp: new Date().toISOString(),
-                    dateTime: new Date().toLocaleString('bn-BD')
-                });
-                saveData();
-            }
-        }
-
-        // Show tab
-        function showTab(tabName) {
-            // Hide all tabs
-            const tabs = document.querySelectorAll('.tab-content');
-            tabs.forEach(tab => tab.classList.remove('active'));
-            
-            // Remove active class from all tab buttons
-            const tabButtons = document.querySelectorAll('.tab');
-            tabButtons.forEach(btn => btn.classList.remove('active'));
-            
-            // Show selected tab
-            const selectedTab = document.getElementById(tabName);
-            if (selectedTab) {
-                selectedTab.classList.add('active');
-            }
-            
-            const selectedButton = document.getElementById('tab-' + tabName);
-            if (selectedButton) {
-                selectedButton.classList.add('active');
-            }
-            
-            // Stop scanner if switching away from scanner tab
-            if (tabName !== 'scanner' && html5QrCode) {
-                stopScanning();
-            }
-            
-            // Update data when switching to parcel list or reports
-            if (tabName === 'parcel-list') {
-                updateParcelList();
-            } else if (tabName === 'reports') {
-                updateReports();
-            } else if (tabName === 'settings') {
-                const totalInfo = document.getElementById('totalParcelsInfo');
-                if (totalInfo) {
-                    totalInfo.textContent = parcels.length;
-                }
-            }
-        }
-
-        // Handle form submission
-        function handleParcelFormSubmit(e) {
+        function handleParcelSubmit(e) {
             e.preventDefault();
             
+            const id = 'CT' + String(counter).padStart(6, '0');
             const parcel = {
-                id: generateParcelId(),
+                id: id,
                 senderName: document.getElementById('senderName').value,
                 senderPhone: document.getElementById('senderPhone').value,
                 receiverName: document.getElementById('receiverName').value,
                 receiverPhone: document.getElementById('receiverPhone').value,
                 destination: document.getElementById('destination').value,
                 deliveryCharge: parseFloat(document.getElementById('deliveryCharge').value),
-                description: document.getElementById('parcelDescription').value,
-                address: document.getElementById('receiverAddress').value,
+                description: document.getElementById('description').value,
                 date: new Date().toLocaleDateString('bn-BD'),
-                dateTime: new Date().toISOString(),
+                timestamp: Date.now(),
                 status: 'pending',
                 tracking: [{
                     type: 'created',
                     description: 'পার্সেল তৈরি করা হয়েছে',
                     user: currentUser.name,
-                    timestamp: new Date().toISOString(),
-                    dateTime: new Date().toLocaleString('bn-BD')
+                    time: new Date().toLocaleString('bn-BD')
                 }]
             };
-            
-            parcels.push(parcel);
-            saveData();
-            
-            showReceipt(parcel);
-        }
 
-        // Show receipt with QR code
-        function showReceipt(parcel) {
-            document.getElementById('receiptParcelId').textContent = parcel.id;
-            document.getElementById('receiptSenderName').textContent = parcel.senderName;
-            document.getElementById('receiptSenderPhone').textContent = parcel.senderPhone;
-            document.getElementById('receiptReceiverName').textContent = parcel.receiverName;
-            document.getElementById('receiptReceiverPhone').textContent = parcel.receiverPhone;
-            document.getElementById('receiptDestination').textContent = parcel.destination;
-            document.getElementById('receiptDescription').textContent = parcel.description || 'N/A';
-            document.getElementById('receiptAddress').textContent = parcel.address || 'N/A';
-            document.getElementById('receiptCharge').textContent = parcel.deliveryCharge + ' টাকা';
-            document.getElementById('receiptDate').textContent = parcel.date;
-            
-            // Generate QR Code
-            const qrCodeDiv = document.getElementById('qr-code');
-            qrCodeDiv.innerHTML = ''; // Clear previous QR code
-            new QRCode(qrCodeDiv, {
-                text: parcel.id,
-                width: 200,
-                height: 200,
-                colorDark: "#2a5298",
-                colorLight: "#ffffff",
-                correctLevel: QRCode.CorrectLevel.H
+            waitForFirebase(() => {
+                const parcelsRef = window.dbRef(window.db, 'parcels');
+                const newRef = window.dbPush(parcelsRef);
+                
+                window.dbSet(newRef, parcel).then(() => {
+                    counter++;
+                    window.dbSet(window.dbRef(window.db, 'counter'), counter);
+                    
+                    // Generate QR
+                    const qrDiv = document.getElementById('qr-code');
+                    qrDiv.innerHTML = '';
+                    new QRCode(qrDiv, {
+                        text: id,
+                        width: 200,
+                        height: 200,
+                        colorDark: "#2a5298",
+                        colorLight: "#ffffff"
+                    });
+                    
+                    document.getElementById('parcel-id-text').textContent = id;
+                    document.getElementById('parcelForm').classList.add('hidden');
+                    document.getElementById('receiptDiv').classList.remove('hidden');
+                    
+                    alert('✅ পার্সেল সফলভাবে যোগ হয়েছে!');
+                });
             });
-            
-            document.getElementById('receiptContainer').style.display = 'block';
-            document.getElementById('parcelForm').style.display = 'none';
-            
-            // Scroll to receipt
-            document.getElementById('receiptContainer').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // Download QR Code
-        function downloadQR() {
-            const qrCanvas = document.querySelector('#qr-code canvas');
-            if (qrCanvas) {
-                const url = qrCanvas.toDataURL('image/png');
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = document.getElementById('receiptParcelId').textContent + '_QR.png';
-                a.click();
-            }
-        }
-
-        // Print receipt
-        function printReceipt() {
-            window.print();
-        }
-
-        // Reset form
         function resetForm() {
-            const form = document.getElementById('parcelForm');
-            if (form) {
-                form.reset();
-                form.style.display = 'block';
-            }
-            const receiptContainer = document.getElementById('receiptContainer');
-            if (receiptContainer) {
-                receiptContainer.style.display = 'none';
-            }
-            updateParcelList();
-            updateReports();
+            document.getElementById('parcelForm').reset();
+            document.getElementById('parcelForm').classList.remove('hidden');
+            document.getElementById('receiptDiv').classList.add('hidden');
+            document.getElementById('qr-code').innerHTML = '';
         }
 
-        // Start scanning
+        // Scanner Interface
+        function loadScannerInterface(isDelivery) {
+            document.getElementById('contentArea').innerHTML = `
+                <div id="scanner" class="tab-content active">
+                    <h2 style="text-align: center; margin-bottom: 25px; color: #2a5298; font-size: 2em;">
+                        ${isDelivery ? '🏍️ পার্সেল ডেলিভার করুন' : '📦 পার্সেল স্ক্যান করুন'}
+                    </h2>
+                    <div class="scanner-container">
+                        <div style="text-align: center; margin-bottom: 20px;">
+                            <button class="btn btn-primary" id="startScanBtn" onclick="startScanning()" style="padding: 20px 40px; font-size: 1.3em;">
+                                📷 ক্যামেরা চালু করুন
+                            </button>
+                            <button class="btn btn-danger hidden" id="stopScanBtn" onclick="stopScanning()" style="padding: 20px 40px; font-size: 1.3em;">
+                                ⏹️ ক্যামেরা বন্ধ করুন
+                            </button>
+                        </div>
+                        <div id="reader" class="hidden"></div>
+                        <div id="scanResult" class="hidden"></div>
+                    </div>
+                    <div id="scannedParcelInfo" class="hidden"></div>
+                </div>
+            `;
+        }
+
+        // Scanner Functions
         function startScanning() {
-            const readerDiv = document.getElementById('reader');
-            readerDiv.style.display = 'block';
-            document.getElementById('startScanBtn').style.display = 'none';
-            document.getElementById('stopScanBtn').style.display = 'inline-block';
+            document.getElementById('reader').classList.remove('hidden');
+            document.getElementById('startScanBtn').classList.add('hidden');
+            document.getElementById('stopScanBtn').classList.remove('hidden');
             
             html5QrCode = new Html5Qrcode("reader");
-            
             html5QrCode.start(
                 { facingMode: "environment" },
                 { fps: 10, qrbox: { width: 250, height: 250 } },
                 onScanSuccess,
-                onScanError
-            ).catch(err => {
-                console.error('Scanner start error:', err);
-                showScanResult('ক্যামেরা চালু করতে সমস্যা হয়েছে। অনুমতি দিন এবং আবার চেষ্টা করুন।', false);
+                () => {}
+            ).catch(() => {
+                alert('ক্যামেরা চালু করতে সমস্যা হয়েছে। অনুমতি দিন।');
                 stopScanning();
             });
         }
 
-        // Stop scanning
         function stopScanning() {
             if (html5QrCode) {
                 html5QrCode.stop().then(() => {
                     html5QrCode.clear();
-                    document.getElementById('reader').style.display = 'none';
-                    document.getElementById('startScanBtn').style.display = 'inline-block';
-                    document.getElementById('stopScanBtn').style.display = 'none';
-                }).catch(err => {
-                    console.error('Scanner stop error:', err);
+                    document.getElementById('reader').classList.add('hidden');
+                    document.getElementById('startScanBtn').classList.remove('hidden');
+                    document.getElementById('stopScanBtn').classList.add('hidden');
                 });
             }
         }
 
-        // On scan success
-        function onScanSuccess(decodedText, decodedResult) {
+        function onScanSuccess(decodedText) {
             const parcel = parcels.find(p => p.id === decodedText);
             
             if (parcel) {
@@ -1350,222 +849,123 @@
                 showScanResult('✅ পার্সেল পাওয়া গেছে: ' + decodedText, true);
                 displayScannedParcel(parcel);
             } else {
-                showScanResult('❌ এই পার্সেল আইডি খুঁজে পাওয়া যায়নি: ' + decodedText, false);
+                showScanResult('❌ পার্সেল খুঁজে পাওয়া যায়নি: ' + decodedText, false);
             }
         }
 
-        // On scan error
-        function onScanError(errorMessage) {
-            // Silent - scanning in progress
-        }
-
-        // Show scan result
         function showScanResult(message, success) {
-            const resultDiv = document.getElementById('scanResult');
-            resultDiv.className = success ? 'scan-result scan-success' : 'scan-result scan-error';
-            resultDiv.textContent = message;
-            resultDiv.style.display = 'block';
+            const div = document.getElementById('scanResult');
+            div.className = success ? 'scan-result scan-success' : 'scan-result scan-error';
+            div.textContent = message;
+            div.classList.remove('hidden');
             
-            setTimeout(() => {
-                if (!success) {
-                    resultDiv.style.display = 'none';
-                }
-            }, 3000);
+            if (!success) {
+                setTimeout(() => div.classList.add('hidden'), 3000);
+            }
         }
 
-        // Display scanned parcel
         function displayScannedParcel(parcel) {
-            const statusClass = parcel.status === 'delivered' ? 'status-delivered' : 
-                               parcel.status === 'unloaded' ? 'status-unloaded' :
-                               parcel.status === 'loaded' ? 'status-loaded' : 'status-pending';
-            const statusText = parcel.status === 'delivered' ? 'ডেলিভার্ড' : 
-                              parcel.status === 'unloaded' ? 'গাড়ি থেকে নামানো হয়েছে' :
-                              parcel.status === 'loaded' ? 'গাড়িতে তোলা হয়েছে' : 'পেন্ডিং';
+            const statusText = {
+                'pending': 'পেন্ডিং',
+                'loaded': 'গাড়িতে তোলা হয়েছে',
+                'unloaded': 'গাড়ি থেকে নামানো হয়েছে',
+                'delivered': 'ডেলিভার্ড'
+            }[parcel.status] || 'পেন্ডিং';
+
+            const isDelivery = currentUser.role === 'delivery';
             
-            let trackingHtml = '';
-            if (parcel.tracking && parcel.tracking.length > 0) {
-                trackingHtml = '<div class="tracking-timeline"><h4 style="margin-bottom: 15px; color: #2a5298;">ট্র্যাকিং হিস্টরি</h4>';
-                parcel.tracking.forEach(track => {
-                    const iconClass = track.type === 'created' ? 'created' :
-                                     track.type === 'loaded' ? 'loaded' :
-                                     track.type === 'unloaded' ? 'unloaded' : 'delivered';
-                    const icon = track.type === 'created' ? '📝' :
-                                track.type === 'loaded' ? '🚛' :
-                                track.type === 'unloaded' ? '📦' : '✅';
-                    
-                    trackingHtml += `
-                        <div class="timeline-item">
-                            <div class="timeline-icon ${iconClass}">${icon}</div>
-                            <div class="timeline-content">
-                                <div class="timeline-title">${track.description}</div>
-                                <div class="timeline-time">${track.dateTime} - ${track.user}</div>
-                            </div>
-                        </div>
-                    `;
-                });
-                trackingHtml += '</div>';
-            }
-            
-            const html = `
+            document.getElementById('scannedParcelInfo').innerHTML = `
                 <div class="parcel-card">
                     <div class="parcel-id">${parcel.id}</div>
                     <div style="margin-bottom: 15px;">
-                        <span class="status-badge ${statusClass}">${statusText}</span>
+                        <span class="status-badge status-${parcel.status}">${statusText}</span>
                     </div>
-                    <div class="parcel-info">
-                        <div class="info-item">
-                            <div class="info-label">প্রেরক</div>
-                            <div class="info-value">${parcel.senderName}</div>
-                            <div class="info-value" style="font-size: 0.9em;">${parcel.senderPhone}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">প্রাপক</div>
-                            <div class="info-value">${parcel.receiverName}</div>
-                            <div class="info-value" style="font-size: 0.9em;">${parcel.receiverPhone}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">গন্তব্য</div>
-                            <div class="info-value">${parcel.destination}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">চার্জ</div>
-                            <div class="info-value">${parcel.deliveryCharge} টাকা</div>
-                        </div>
+                    <div class="grid-2" style="font-size: 0.95em;">
+                        <div><strong>প্রেরক:</strong> ${parcel.senderName}</div>
+                        <div><strong>প্রাপক:</strong> ${parcel.receiverName}</div>
+                        <div><strong>গন্তব্য:</strong> ${parcel.destination}</div>
+                        <div><strong>চার্জ:</strong> ${parcel.deliveryCharge} টাকা</div>
                     </div>
-                    ${trackingHtml}
+                    <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
+                        ${!isDelivery ? `
+                            <button class="btn btn-success" onclick="updateStatus('loaded')" style="flex: 1;">✅ গাড়িতে তোলা</button>
+                            <button class="btn btn-warning" onclick="updateStatus('unloaded')" style="flex: 1;">📦 গাড়ি থেকে নামানো</button>
+                        ` : ''}
+                        <button class="btn btn-primary" onclick="updateStatus('delivered')" style="flex: 1;">🎉 ডেলিভার্ড</button>
+                    </div>
                 </div>
             `;
             
-            document.getElementById('scannedParcelCard').innerHTML = html;
-            document.getElementById('scannedParcelInfo').style.display = 'block';
+            document.getElementById('scannedParcelInfo').classList.remove('hidden');
         }
 
-        // Mark as loaded
-        function markAsLoaded() {
-            if (currentScannedParcelId) {
-                const parcel = parcels.find(p => p.id === currentScannedParcelId);
-                if (parcel) {
-                    parcel.status = 'loaded';
-                    addTrackingEvent(currentScannedParcelId, 'loaded', 'গাড়িতে তোলা হয়েছে');
-                    saveData();
-                    displayScannedParcel(parcel);
-                    showScanResult('✅ পার্সেল গাড়িতে তোলা হয়েছে', true);
-                    updateParcelList();
-                    updateReports();
-                }
-            }
+        function updateStatus(newStatus) {
+            if (!currentScannedParcelId) return;
+            
+            const parcel = parcels.find(p => p.id === currentScannedParcelId);
+            if (!parcel) return;
+
+            const descriptions = {
+                'loaded': 'গাড়িতে তোলা হয়েছে',
+                'unloaded': 'গাড়ি থেকে নামানো হয়েছে',
+                'delivered': 'পার্সেল ডেলিভার্ড'
+            };
+
+            if (!parcel.tracking) parcel.tracking = [];
+            parcel.tracking.push({
+                type: newStatus,
+                description: descriptions[newStatus],
+                user: currentUser.name,
+                time: new Date().toLocaleString('bn-BD')
+            });
+
+            waitForFirebase(() => {
+                const ref = window.dbRef(window.db, 'parcels/' + parcel.key);
+                window.dbUpdate(ref, {
+                    status: newStatus,
+                    tracking: parcel.tracking
+                }).then(() => {
+                    alert('✅ স্ট্যাটাস আপডেট হয়েছে!');
+                    document.getElementById('scannedParcelInfo').classList.add('hidden');
+                    document.getElementById('scanResult').classList.add('hidden');
+                });
+            });
         }
 
-        // Mark as unloaded
-        function markAsUnloaded() {
-            if (currentScannedParcelId) {
-                const parcel = parcels.find(p => p.id === currentScannedParcelId);
-                if (parcel) {
-                    parcel.status = 'unloaded';
-                    addTrackingEvent(currentScannedParcelId, 'unloaded', 'গাড়ি থেকে নামানো হয়েছে');
-                    saveData();
-                    displayScannedParcel(parcel);
-                    showScanResult('✅ পার্সেল গাড়ি থেকে নামানো হয়েছে', true);
-                    updateParcelList();
-                    updateReports();
-                }
-            }
-        }
-
-        // Mark as delivered
-        function markAsDelivered() {
-            if (currentScannedParcelId) {
-                const parcel = parcels.find(p => p.id === currentScannedParcelId);
-                if (parcel) {
-                    parcel.status = 'delivered';
-                    addTrackingEvent(currentScannedParcelId, 'delivered', 'পার্সেল ডেলিভার্ড');
-                    saveData();
-                    displayScannedParcel(parcel);
-                    showScanResult('✅ পার্সেল ডেলিভার্ড হয়েছে', true);
-                    updateParcelList();
-                    updateReports();
-                }
-            }
-        }
-
-        // Update parcel list (Manager only)
+        // Parcel List
         function updateParcelList() {
             const container = document.getElementById('parcelListContainer');
             if (!container) return;
             
             if (parcels.length === 0) {
-                container.innerHTML = '<div class="no-data">কোনো পার্সেল পাওয়া যায়নি</div>';
+                container.innerHTML = '<div class="no-data">কোনো পার্সেল নেই</div>';
                 return;
             }
             
             let html = '';
-            const sortedParcels = [...parcels].reverse();
-            
-            sortedParcels.forEach(parcel => {
-                const statusClass = parcel.status === 'delivered' ? 'status-delivered' : 
-                                   parcel.status === 'unloaded' ? 'status-unloaded' :
-                                   parcel.status === 'loaded' ? 'status-loaded' : 'status-pending';
-                const statusText = parcel.status === 'delivered' ? 'ডেলিভার্ড' : 
-                                  parcel.status === 'unloaded' ? 'গাড়ি থেকে নামানো হয়েছে' :
-                                  parcel.status === 'loaded' ? 'গাড়িতে তোলা হয়েছে' : 'পেন্ডিং';
-                
-                let trackingHtml = '';
-                if (parcel.tracking && parcel.tracking.length > 0) {
-                    trackingHtml = '<div class="tracking-timeline" style="margin-top: 15px;"><h4 style="margin-bottom: 10px; color: #2a5298; font-size: 1em;">ট্র্যাকিং হিস্টরি</h4>';
-                    parcel.tracking.slice().reverse().forEach(track => {
-                        const iconClass = track.type === 'created' ? 'created' :
-                                         track.type === 'loaded' ? 'loaded' :
-                                         track.type === 'unloaded' ? 'unloaded' : 'delivered';
-                        const icon = track.type === 'created' ? '📝' :
-                                    track.type === 'loaded' ? '🚛' :
-                                    track.type === 'unloaded' ? '📦' : '✅';
-                        
-                        trackingHtml += `
-                            <div class="timeline-item">
-                                <div class="timeline-icon ${iconClass}">${icon}</div>
-                                <div class="timeline-content">
-                                    <div class="timeline-title">${track.description}</div>
-                                    <div class="timeline-time">${track.dateTime} - ${track.user || 'সিস্টেম'}</div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    trackingHtml += '</div>';
-                }
-                
+            parcels.sort((a, b) => b.timestamp - a.timestamp).forEach(p => {
+                const statusText = {
+                    'pending': 'পেন্ডিং',
+                    'loaded': 'গাড়িতে তোলা',
+                    'unloaded': 'গাড়ি থেকে নামানো',
+                    'delivered': 'ডেলিভার্ড'
+                }[p.status] || 'পেন্ডিং';
+
                 html += `
                     <div class="parcel-card">
-                        <div class="parcel-id">${parcel.id}</div>
-                        <div style="margin-bottom: 15px;">
-                            <span class="status-badge ${statusClass}">${statusText}</span>
+                        <div class="parcel-id">${p.id}</div>
+                        <div style="margin-bottom: 10px;">
+                            <span class="status-badge status-${p.status}">${statusText}</span>
                         </div>
-                        <div class="parcel-info">
-                            <div class="info-item">
-                                <div class="info-label">প্রেরক</div>
-                                <div class="info-value">${parcel.senderName}</div>
-                                <div class="info-value" style="font-size: 0.9em;">${parcel.senderPhone}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">প্রাপক</div>
-                                <div class="info-value">${parcel.receiverName}</div>
-                                <div class="info-value" style="font-size: 0.9em;">${parcel.receiverPhone}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">গন্তব্য</div>
-                                <div class="info-value">${parcel.destination}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">চার্জ</div>
-                                <div class="info-value">${parcel.deliveryCharge} টাকা</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">তারিখ</div>
-                                <div class="info-value">${parcel.date}</div>
-                            </div>
+                        <div class="grid-2" style="font-size: 0.95em;">
+                            <div><strong>প্রেরক:</strong> ${p.senderName} (${p.senderPhone})</div>
+                            <div><strong>প্রাপক:</strong> ${p.receiverName} (${p.receiverPhone})</div>
+                            <div><strong>গন্তব্য:</strong> ${p.destination}</div>
+                            <div><strong>চার্জ:</strong> ${p.deliveryCharge} টাকা</div>
+                            <div><strong>তারিখ:</strong> ${p.date}</div>
                         </div>
-                        ${trackingHtml}
-                        <div class="action-buttons">
-                            <button class="btn btn-danger" onclick="deleteParcel('${parcel.id}')">মুছুন</button>
+                        <div style="margin-top: 15px;">
+                            <button class="btn btn-danger" onclick="deleteParcel('${p.key}')">🗑️ মুছুন</button>
                         </div>
                     </div>
                 `;
@@ -1574,240 +974,63 @@
             container.innerHTML = html;
         }
 
-        // Filter parcels
-        function filterParcels() {
-            const searchInput = document.getElementById('searchInput');
-            if (!searchInput) return;
-            
-            const searchTerm = searchInput.value.toLowerCase();
-            const filtered = parcels.filter(parcel => 
-                parcel.id.toLowerCase().includes(searchTerm) ||
-                parcel.senderName.toLowerCase().includes(searchTerm) ||
-                parcel.receiverName.toLowerCase().includes(searchTerm) ||
-                parcel.senderPhone.includes(searchTerm) ||
-                parcel.receiverPhone.includes(searchTerm)
-            );
-            
-            const container = document.getElementById('parcelListContainer');
-            
-            if (filtered.length === 0) {
-                container.innerHTML = '<div class="no-data">কোনো পার্সেল পাওয়া যায়নি</div>';
-                return;
-            }
-            
-            let html = '';
-            filtered.reverse().forEach(parcel => {
-                const statusClass = parcel.status === 'delivered' ? 'status-delivered' : 
-                                   parcel.status === 'unloaded' ? 'status-unloaded' :
-                                   parcel.status === 'loaded' ? 'status-loaded' : 'status-pending';
-                const statusText = parcel.status === 'delivered' ? 'ডেলিভার্ড' : 
-                                  parcel.status === 'unloaded' ? 'গাড়ি থেকে নামানো হয়েছে' :
-                                  parcel.status === 'loaded' ? 'গাড়িতে তোলা হয়েছে' : 'পেন্ডিং';
-                
-                let trackingHtml = '';
-                if (parcel.tracking && parcel.tracking.length > 0) {
-                    trackingHtml = '<div class="tracking-timeline" style="margin-top: 15px;"><h4 style="margin-bottom: 10px; color: #2a5298; font-size: 1em;">ট্র্যাকিং হিস্টরি</h4>';
-                    parcel.tracking.slice().reverse().forEach(track => {
-                        const iconClass = track.type === 'created' ? 'created' :
-                                         track.type === 'loaded' ? 'loaded' :
-                                         track.type === 'unloaded' ? 'unloaded' : 'delivered';
-                        const icon = track.type === 'created' ? '📝' :
-                                    track.type === 'loaded' ? '🚛' :
-                                    track.type === 'unloaded' ? '📦' : '✅';
-                        
-                        trackingHtml += `
-                            <div class="timeline-item">
-                                <div class="timeline-icon ${iconClass}">${icon}</div>
-                                <div class="timeline-content">
-                                    <div class="timeline-title">${track.description}</div>
-                                    <div class="timeline-time">${track.dateTime} - ${track.user || 'সিস্টেম'}</div>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    trackingHtml += '</div>';
-                }
-                
-                html += `
-                    <div class="parcel-card">
-                        <div class="parcel-id">${parcel.id}</div>
-                        <div style="margin-bottom: 15px;">
-                            <span class="status-badge ${statusClass}">${statusText}</span>
-                        </div>
-                        <div class="parcel-info">
-                            <div class="info-item">
-                                <div class="info-label">প্রেরক</div>
-                                <div class="info-value">${parcel.senderName}</div>
-                                <div class="info-value" style="font-size: 0.9em;">${parcel.senderPhone}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">প্রাপক</div>
-                                <div class="info-value">${parcel.receiverName}</div>
-                                <div class="info-value" style="font-size: 0.9em;">${parcel.receiverPhone}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">গন্তব্য</div>
-                                <div class="info-value">${parcel.destination}</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">চার্জ</div>
-                                <div class="info-value">${parcel.deliveryCharge} টাকা</div>
-                            </div>
-                            <div class="info-item">
-                                <div class="info-label">তারিখ</div>
-                                <div class="info-value">${parcel.date}</div>
-                            </div>
-                        </div>
-                        ${trackingHtml}
-                        <div class="action-buttons">
-                            <button class="btn btn-danger" onclick="deleteParcel('${parcel.id}')">মুছুন</button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-        }
-
-        // Delete parcel
-        function deleteParcel(parcelId) {
-            if (confirm('আপনি কি এই পার্সেলটি মুছে ফেলতে চান?')) {
-                parcels = parcels.filter(p => p.id !== parcelId);
-                saveData();
-                updateParcelList();
-                updateReports();
+        function deleteParcel(key) {
+            if (confirm('মুছে ফেলবেন?')) {
+                waitForFirebase(() => {
+                    const ref = window.dbRef(window.db, 'parcels/' + key);
+                    window.dbRemove(ref);
+                });
             }
         }
 
-        // Update reports
+        // Reports
         function updateReports() {
-            const statsContainer = document.getElementById('statsContainer');
-            if (!statsContainer) return;
-            
-            const totalParcels = parcels.length;
-            const pendingParcels = parcels.filter(p => p.status === 'pending').length;
-            const loadedParcels = parcels.filter(p => p.status === 'loaded').length;
-            const unloadedParcels = parcels.filter(p => p.status === 'unloaded').length;
-            const deliveredParcels = parcels.filter(p => p.status === 'delivered').length;
-            const totalRevenue = parcels.reduce((sum, p) => sum + p.deliveryCharge, 0);
-            
-            const statsHtml = `
+            const container = document.getElementById('statsContainer');
+            if (!container) return;
+
+            const total = parcels.length;
+            const pending = parcels.filter(p => p.status === 'pending').length;
+            const loaded = parcels.filter(p => p.status === 'loaded').length;
+            const unloaded = parcels.filter(p => p.status === 'unloaded').length;
+            const delivered = parcels.filter(p => p.status === 'delivered').length;
+            const revenue = parcels.reduce((sum, p) => sum + p.deliveryCharge, 0);
+
+            container.innerHTML = `
                 <div class="stat-card">
-                    <h3>${totalParcels}</h3>
+                    <h3>${total}</h3>
                     <p>মোট পার্সেল</p>
                 </div>
                 <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
-                    <h3>${pendingParcels}</h3>
+                    <h3>${pending}</h3>
                     <p>পেন্ডিং</p>
                 </div>
                 <div class="stat-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
-                    <h3>${loadedParcels}</h3>
+                    <h3>${loaded}</h3>
                     <p>গাড়িতে তোলা</p>
                 </div>
                 <div class="stat-card" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
-                    <h3>${unloadedParcels}</h3>
-                    <p>গাড়ি থেকে নামানো</p>
+                    <h3>${unloaded}</h3>
+                    <p>নামানো</p>
                 </div>
                 <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
-                    <h3>${deliveredParcels}</h3>
+                    <h3>${delivered}</h3>
                     <p>ডেলিভার্ড</p>
                 </div>
                 <div class="stat-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
-                    <h3>${totalRevenue}</h3>
+                    <h3>${revenue}</h3>
                     <p>মোট আয় (টাকা)</p>
                 </div>
             `;
-            
-            statsContainer.innerHTML = statsHtml;
-            
-            // Destination stats
-            const destStatsContainer = document.getElementById('destinationStats');
-            if (!destStatsContainer) return;
-            
-            const destinations = ['ফেনী', 'ছাগলনাইয়া', 'বসুরহাট', 'দাগনভূঞা', 'মুরাদপুর'];
-            let destHtml = '';
-            
-            destinations.forEach(dest => {
-                const destParcels = parcels.filter(p => p.destination === dest);
-                const destCount = destParcels.length;
-                const destRevenue = destParcels.reduce((sum, p) => sum + p.deliveryCharge, 0);
-                
-                if (destCount > 0) {
-                    destHtml += `
-                        <div class="parcel-card">
-                            <h3 style="color: #2a5298; margin-bottom: 15px;">${dest}</h3>
-                            <div class="parcel-info">
-                                <div class="info-item">
-                                    <div class="info-label">মোট পার্সেল</div>
-                                    <div class="info-value">${destCount}</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">মোট আয়</div>
-                                    <div class="info-value">${destRevenue} টাকা</div>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                }
-            });
-            
-            destStatsContainer.innerHTML = destHtml || '<div class="no-data">কোনো ডেটা নেই</div>';
         }
 
-        // Export data
-        function exportData() {
-            const data = {
-                parcels: parcels,
-                counter: parcelCounter,
-                exportDate: new Date().toISOString()
-            };
-            
-            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'chishtiya-transport-data-' + new Date().toISOString().split('T')[0] + '.json';
-            a.click();
-            URL.revokeObjectURL(url);
-        }
-
-        // Import data
-        function importData(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    try {
-                        const data = JSON.parse(e.target.result);
-                        if (confirm('আপনি কি বর্তমান ডেটা রিপ্লেস করতে চান?')) {
-                            parcels = data.parcels || [];
-                            parcelCounter = data.counter || 1;
-                            saveData();
-                            updateParcelList();
-                            updateReports();
-                            alert('ডেটা সফলভাবে আপলোড হয়েছে!');
-                        }
-                    } catch (error) {
-                        alert('ফাইল লোড করতে সমস্যা হয়েছে!');
-                    }
-                };
-                reader.readAsText(file);
+        // Check login on page load
+        window.onload = function() {
+            const savedUser = localStorage.getItem('chishtiyaCurrentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showMainApp();
             }
-        }
-
-        // Clear all data
-        function clearAllData() {
-            if (confirm('আপনি কি সত্যিই সব ডেটা মুছে ফেলতে চান? এটি পুনরুদ্ধার করা যাবে না!')) {
-                if (confirm('নিশ্চিত? এটি স্থায়ীভাবে মুছে যাবে!')) {
-                    parcels = [];
-                    parcelCounter = 1;
-                    saveData();
-                    updateParcelList();
-                    updateReports();
-                    alert('সব ডেটা মুছে ফেলা হয়েছে!');
-                }
-            }
-        }
+        };
     </script>
 </body>
 </html>
