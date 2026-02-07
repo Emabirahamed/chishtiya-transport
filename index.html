@@ -883,6 +883,25 @@
 
                 <div id="scanner" class="tab-content">
                     <h2 style="margin-bottom: 25px; color: #2a5298;">QR কোড স্ক্যান করুন</h2>
+                    
+                    <div class="form-group">
+                        <label>বর্তমান মোকাম নির্বাচন করুন *</label>
+                        <select id="currentMokam" style="font-size: 1.1em; padding: 15px;">
+                            <option value="">মোকাম নির্বাচন করুন</option>
+                            <option value="ঢাকা অফিস">ঢাকা অফিস</option>
+                            <option value="ফেনী অফিস">ফেনী অফিস</option>
+                            <option value="ছাগলনাইয়া অফিস">ছাগলনাইয়া অফিস</option>
+                            <option value="বসুরহাট অফিস">বসুরহাট অফিস</option>
+                            <option value="দাগনভূঞা অফিস">দাগনভূঞা অফিস</option>
+                            <option value="মুরাদপুর অফিস">মুরাদপুর অফিস</option>
+                            <option value="ঢাকা-ফেনী গাড়ি">ঢাকা-ফেনী গাড়ি</option>
+                            <option value="ফেনী-ছাগলনাইয়া গাড়ি">ফেনী-ছাগলনাইয়া গাড়ি</option>
+                            <option value="ফেনী-বসুরহাট গাড়ি">ফেনী-বসুরহাট গাড়ি</option>
+                            <option value="ফেনী-দাগনভূঞা গাড়ি">ফেনী-দাগনভূঞা গাড়ি</option>
+                            <option value="ফেনী-মুরাদপুর গাড়ি">ফেনী-মুরাদপুর গাড়ি</option>
+                        </select>
+                    </div>
+                    
                     <div class="scanner-container">
                         <div style="text-align: center; margin-bottom: 20px;">
                             <button class="btn btn-primary" id="startScanBtn" onclick="startScanning()">📷 ক্যামেরা চালু করুন</button>
@@ -941,9 +960,11 @@
                 date: new Date().toLocaleDateString('bn-BD'),
                 timestamp: Date.now(),
                 status: 'pending',
+                currentLocation: 'ঢাকা অফিস',
                 tracking: [{
                     type: 'created',
                     description: 'পার্সেল তৈরি করা হয়েছে',
+                    location: 'ঢাকা অফিস',
                     user: currentUser.name,
                     time: new Date().toLocaleString('bn-BD')
                 }]
@@ -1028,6 +1049,30 @@
             }[parcel.status] || 'পেন্ডিং';
 
             const paymentText = parcel.paymentStatus === 'paid' ? '✅ পরিশোধিত' : '⏳ বাকি আছে';
+            const currentLocation = parcel.currentLocation || 'ঢাকা অফিস';
+
+            // Build tracking history
+            let trackingHtml = '';
+            if (parcel.tracking && parcel.tracking.length > 0) {
+                trackingHtml = '<div style="margin-top: 20px; background: white; padding: 15px; border-radius: 8px;"><h4 style="margin-bottom: 15px; color: #2a5298;">📍 ট্র্যাকিং হিস্টরি</h4>';
+                parcel.tracking.slice().reverse().forEach(track => {
+                    const icon = track.type === 'created' ? '📝' :
+                                track.type === 'loaded' ? '🚛' :
+                                track.type === 'unloaded' ? '📦' : '✅';
+                    
+                    trackingHtml += `
+                        <div style="display: flex; gap: 10px; padding: 10px; border-bottom: 1px dashed #dee2e6;">
+                            <div style="font-size: 1.5em;">${icon}</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">${track.description}</div>
+                                ${track.location ? '<div style="color: #2a5298; font-weight: 600;">📍 ' + track.location + '</div>' : ''}
+                                <div style="font-size: 0.9em; color: #6c757d;">${track.time} - ${track.user}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                trackingHtml += '</div>';
+            }
 
             container.innerHTML = `
                 <div class="parcel-card">
@@ -1036,6 +1081,12 @@
                         <span class="status-badge status-${parcel.status}">${statusText}</span>
                         <span class="status-badge payment-${parcel.paymentStatus}">${paymentText}</span>
                     </div>
+                    
+                    <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #2a5298;">
+                        <strong style="color: #2a5298; font-size: 1.1em;">📍 বর্তমান অবস্থান:</strong>
+                        <div style="font-size: 1.3em; font-weight: bold; color: #1e3c72; margin-top: 5px;">${currentLocation}</div>
+                    </div>
+                    
                     <div class="grid-2" style="font-size: 0.95em;">
                         <div><strong>প্রেরক:</strong> ${parcel.senderName} (${parcel.senderPhone})</div>
                         <div><strong>প্রাপক:</strong> ${parcel.receiverName} (${parcel.receiverPhone})</div>
@@ -1045,6 +1096,9 @@
                         <div><strong>পেমেন্ট:</strong> ${paymentText}</div>
                     </div>
                     ${parcel.description ? '<div style="margin-top: 10px;"><strong>বিবরণ:</strong> ' + parcel.description + '</div>' : ''}
+                    
+                    ${trackingHtml}
+                    
                     <div style="margin-top: 15px;">
                         ${parcel.paymentStatus === 'due' ? 
                             '<button class="btn btn-success" onclick="markAsPaid(\'' + parcel.key + '\')">💵 পরিশোধিত করুন</button>' : ''}
@@ -1081,6 +1135,25 @@
                     <h2 style="text-align: center; margin-bottom: 25px; color: #2a5298; font-size: 2em;">
                         ${isDelivery ? '🏍️ পার্সেল ডেলিভার করুন' : '📦 পার্সেল স্ক্যান করুন'}
                     </h2>
+                    
+                    <div class="form-group" style="max-width: 600px; margin: 0 auto 30px;">
+                        <label>বর্তমান মোকাম নির্বাচন করুন *</label>
+                        <select id="currentMokam" style="font-size: 1.1em; padding: 15px;">
+                            <option value="">মোকাম নির্বাচন করুন</option>
+                            <option value="ঢাকা অফিস">ঢাকা অফিস</option>
+                            <option value="ফেনী অফিস">ফেনী অফিস</option>
+                            <option value="ছাগলনাইয়া অফিস">ছাগলনাইয়া অফিস</option>
+                            <option value="বসুরহাট অফিস">বসুরহাট অফিস</option>
+                            <option value="দাগনভূঞা অফিস">দাগনভূঞা অফিস</option>
+                            <option value="মুরাদপুর অফিস">মুরাদপুর অফিস</option>
+                            <option value="ঢাকা-ফেনী গাড়ি">ঢাকা-ফেনী গাড়ি</option>
+                            <option value="ফেনী-ছাগলনাইয়া গাড়ি">ফেনী-ছাগলনাইয়া গাড়ি</option>
+                            <option value="ফেনী-বসুরহাট গাড়ি">ফেনী-বসুরহাট গাড়ি</option>
+                            <option value="ফেনী-দাগনভূঞা গাড়ি">ফেনী-দাগনভূঞা গাড়ি</option>
+                            <option value="ফেনী-মুরাদপুর গাড়ি">ফেনী-মুরাদপুর গাড়ি</option>
+                        </select>
+                    </div>
+                    
                     <div class="scanner-container">
                         <div style="text-align: center; margin-bottom: 20px;">
                             <button class="btn btn-primary" id="startScanBtn" onclick="startScanning()" style="padding: 20px 40px; font-size: 1.3em;">
@@ -1161,6 +1234,32 @@
             const paymentText = parcel.paymentStatus === 'paid' ? '✅ পরিশোধিত' : '⏳ বাকি';
             const isDelivery = currentUser.role === 'delivery';
             
+            // Show current location
+            const currentLocation = parcel.currentLocation || 'ঢাকা অফিস';
+            
+            // Build tracking history
+            let trackingHtml = '';
+            if (parcel.tracking && parcel.tracking.length > 0) {
+                trackingHtml = '<div style="margin-top: 20px; background: white; padding: 15px; border-radius: 8px;"><h4 style="margin-bottom: 15px; color: #2a5298;">📍 ট্র্যাকিং হিস্টরি</h4>';
+                parcel.tracking.slice().reverse().forEach(track => {
+                    const icon = track.type === 'created' ? '📝' :
+                                track.type === 'loaded' ? '🚛' :
+                                track.type === 'unloaded' ? '📦' : '✅';
+                    
+                    trackingHtml += `
+                        <div style="display: flex; gap: 10px; padding: 10px; border-bottom: 1px dashed #dee2e6;">
+                            <div style="font-size: 1.5em;">${icon}</div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 600;">${track.description}</div>
+                                ${track.location ? '<div style="color: #2a5298; font-weight: 600;">📍 ' + track.location + '</div>' : ''}
+                                <div style="font-size: 0.9em; color: #6c757d;">${track.time} - ${track.user}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                trackingHtml += '</div>';
+            }
+            
             document.getElementById('scannedParcelInfo').innerHTML = `
                 <div class="parcel-card">
                     <div class="parcel-id">${parcel.id}</div>
@@ -1168,12 +1267,21 @@
                         <span class="status-badge status-${parcel.status}">${statusText}</span>
                         <span class="status-badge payment-${parcel.paymentStatus}">${paymentText}</span>
                     </div>
+                    
+                    <div style="background: #e7f3ff; padding: 15px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid #2a5298;">
+                        <strong style="color: #2a5298; font-size: 1.1em;">📍 বর্তমান অবস্থান:</strong>
+                        <div style="font-size: 1.3em; font-weight: bold; color: #1e3c72; margin-top: 5px;">${currentLocation}</div>
+                    </div>
+                    
                     <div class="grid-2" style="font-size: 0.95em;">
                         <div><strong>প্রেরক:</strong> ${parcel.senderName}</div>
                         <div><strong>প্রাপক:</strong> ${parcel.receiverName}</div>
                         <div><strong>গন্তব্য:</strong> ${parcel.destination}</div>
                         <div><strong>চার্জ:</strong> ${parcel.deliveryCharge} টাকা</div>
                     </div>
+                    
+                    ${trackingHtml}
+                    
                     <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
                         ${!isDelivery ? `
                             <button class="btn btn-success" onclick="updateStatus('loaded')" style="flex: 1;">✅ গাড়িতে তোলা</button>
@@ -1190,6 +1298,12 @@
         function updateStatus(newStatus) {
             if (!currentScannedParcelId) return;
             
+            const mokam = document.getElementById('currentMokam');
+            if (!mokam || !mokam.value) {
+                alert('⚠️ অনুগ্রহ করে মোকাম নির্বাচন করুন!');
+                return;
+            }
+            
             const parcel = parcels.find(p => p.id === currentScannedParcelId);
             if (!parcel) return;
 
@@ -1203,6 +1317,7 @@
             parcel.tracking.push({
                 type: newStatus,
                 description: descriptions[newStatus],
+                location: mokam.value,
                 user: currentUser.name,
                 time: new Date().toLocaleString('bn-BD')
             });
@@ -1211,11 +1326,13 @@
                 const ref = window.dbRef(window.db, 'parcels/' + parcel.key);
                 window.dbUpdate(ref, {
                     status: newStatus,
+                    currentLocation: mokam.value,
                     tracking: parcel.tracking
                 }).then(() => {
-                    alert('✅ স্ট্যাটাস আপডেট হয়েছে!');
+                    alert('✅ স্ট্যাটাস আপডেট হয়েছে!\n📍 মোকাম: ' + mokam.value);
                     document.getElementById('scannedParcelInfo').classList.add('hidden');
                     document.getElementById('scanResult').classList.add('hidden');
+                    mokam.value = '';
                 });
             });
         }
@@ -1239,6 +1356,7 @@
                 }[p.status] || 'পেন্ডিং';
 
                 const paymentText = p.paymentStatus === 'paid' ? '✅ পরিশোধিত' : '⏳ বাকি';
+                const currentLocation = p.currentLocation || 'ঢাকা অফিস';
 
                 html += `
                     <div class="parcel-card">
@@ -1247,6 +1365,12 @@
                             <span class="status-badge status-${p.status}">${statusText}</span>
                             <span class="status-badge payment-${p.paymentStatus}">${paymentText}</span>
                         </div>
+                        
+                        <div style="background: #e7f3ff; padding: 10px; border-radius: 6px; margin-bottom: 10px; border-left: 3px solid #2a5298;">
+                            <strong style="color: #2a5298;">📍 বর্তমান অবস্থান:</strong>
+                            <span style="font-weight: bold; color: #1e3c72; margin-left: 5px;">${currentLocation}</span>
+                        </div>
+                        
                         <div class="grid-2" style="font-size: 0.95em;">
                             <div><strong>প্রেরক:</strong> ${p.senderName} (${p.senderPhone})</div>
                             <div><strong>প্রাপক:</strong> ${p.receiverName} (${p.receiverPhone})</div>
