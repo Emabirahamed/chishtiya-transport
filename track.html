@@ -40,7 +40,7 @@
         }
         
         .container {
-            max-width: 800px;
+            max-width: 900px;
             margin: 50px auto;
             background: white;
             border-radius: 20px;
@@ -76,11 +76,13 @@
             border-radius: 15px;
             font-size: 1.3em;
             font-family: 'Noto Sans Bengali', Arial, sans-serif;
+            transition: all 0.3s;
         }
         
         .search-box input:focus {
             outline: none;
             box-shadow: 0 0 0 4px rgba(42, 82, 152, 0.2);
+            transform: translateY(-2px);
         }
         
         .search-icon {
@@ -116,31 +118,43 @@
         .result {
             margin-top: 30px;
             display: none;
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
         .parcel-card {
-            background: #f8f9fa;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
             border: 3px solid #2a5298;
-            border-radius: 15px;
-            padding: 30px;
+            border-radius: 20px;
+            padding: 35px;
             margin-bottom: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         
         .parcel-id {
-            font-size: 2em;
+            font-size: 2.2em;
             font-weight: bold;
             color: #2a5298;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
+            padding: 15px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
         .status-box {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 25px;
-            border-radius: 12px;
+            padding: 30px;
+            border-radius: 15px;
             text-align: center;
             margin-bottom: 25px;
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
         }
         
         .status-box h2 {
@@ -148,12 +162,19 @@
             margin-bottom: 10px;
         }
         
+        .status-box .status-text {
+            font-size: 1.4em;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        
         .location-box {
-            background: #e7f3ff;
-            padding: 20px;
-            border-radius: 10px;
+            background: linear-gradient(135deg, #e7f3ff 0%, #d1e7ff 100%);
+            padding: 25px;
+            border-radius: 15px;
             border-left: 5px solid #2a5298;
             margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
         
         .location-box h3 {
@@ -163,64 +184,77 @@
         }
         
         .location-box .location {
-            font-size: 1.5em;
+            font-size: 1.6em;
             font-weight: bold;
             color: #1e3c72;
         }
         
         .info-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
             gap: 15px;
             margin-bottom: 25px;
         }
         
         .info-item {
             background: white;
-            padding: 15px;
-            border-radius: 8px;
+            padding: 18px;
+            border-radius: 12px;
             border: 2px solid #e9ecef;
+            transition: all 0.3s;
+        }
+        
+        .info-item:hover {
+            border-color: #2a5298;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
         
         .info-label {
             font-weight: 600;
             color: #6c757d;
-            font-size: 0.9em;
-            margin-bottom: 5px;
+            font-size: 0.95em;
+            margin-bottom: 8px;
         }
         
         .info-value {
-            font-size: 1.1em;
+            font-size: 1.15em;
             color: #2c3e50;
             font-weight: 600;
         }
         
         .timeline {
             background: white;
-            padding: 20px;
-            border-radius: 10px;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
         }
         
         .timeline h3 {
             color: #2a5298;
-            margin-bottom: 20px;
-            font-size: 1.3em;
+            margin-bottom: 25px;
+            font-size: 1.4em;
+            text-align: center;
         }
         
         .timeline-item {
             display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
-            padding-bottom: 20px;
-            border-bottom: 2px dashed #dee2e6;
+            gap: 20px;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            border-left: 4px solid #2a5298;
+            transition: all 0.3s;
         }
         
-        .timeline-item:last-child {
-            border-bottom: none;
+        .timeline-item:hover {
+            background: #e9ecef;
+            transform: translateX(5px);
         }
         
         .timeline-icon {
-            font-size: 2em;
+            font-size: 2.2em;
             flex-shrink: 0;
         }
         
@@ -230,30 +264,37 @@
         
         .timeline-title {
             font-weight: bold;
-            font-size: 1.1em;
+            font-size: 1.15em;
             color: #2c3e50;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
         }
         
         .timeline-location {
             color: #2a5298;
             font-weight: 600;
-            margin-bottom: 3px;
+            margin-bottom: 5px;
+            font-size: 1.05em;
         }
         
         .timeline-time {
             color: #6c757d;
-            font-size: 0.9em;
+            font-size: 0.95em;
         }
         
         .error {
-            background: #f8d7da;
+            background: linear-gradient(135deg, #f8d7da 0%, #f1aeb5 100%);
             color: #842029;
-            padding: 20px;
-            border-radius: 10px;
+            padding: 30px;
+            border-radius: 15px;
             text-align: center;
-            font-size: 1.1em;
-            border: 2px solid #842029;
+            font-size: 1.2em;
+            border: 3px solid #842029;
+            box-shadow: 0 5px 20px rgba(132, 32, 41, 0.2);
+        }
+        
+        .error-icon {
+            font-size: 3em;
+            margin-bottom: 15px;
         }
         
         .status-badge {
@@ -275,7 +316,67 @@
             text-align: center;
             color: #6c757d;
             margin-top: 20px;
-            font-size: 0.95em;
+            font-size: 1em;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+        
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2a5298;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.5s;
+        }
+        
+        .contact-info {
+            background: linear-gradient(135deg, #d1e7ff 0%, #e7f3ff 100%);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            margin-top: 20px;
+            border: 2px solid #2a5298;
+        }
+        
+        .contact-info h4 {
+            color: #2a5298;
+            margin-bottom: 10px;
+        }
+        
+        .contact-info a {
+            color: #2a5298;
+            text-decoration: none;
+            font-weight: 600;
         }
         
         @media (max-width: 768px) {
@@ -283,6 +384,8 @@
             .header h1 { font-size: 2em; }
             .search-box input { font-size: 1.1em; padding: 18px 18px 18px 55px; }
             .info-grid { grid-template-columns: 1fr; }
+            .parcel-id { font-size: 1.8em; }
+            .status-box h2 { font-size: 1.5em; }
         }
     </style>
 </head>
@@ -295,29 +398,39 @@
         
         <div class="search-box">
             <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" placeholder="পার্সেল আইডি লিখুন (যেমন: CT000001)" onkeypress="if(event.key==='Enter') trackParcel()">
+            <input type="text" id="searchInput" placeholder="পার্সেল আইডি লিখুন (যেমন: CT000001)" 
+                   onkeypress="if(event.key==='Enter') trackParcel()" autofocus>
         </div>
         
         <button class="btn btn-primary" onclick="trackParcel()">
             📦 পার্সেল খুঁজুন
         </button>
         
-        <p class="help-text">
+        <div class="help-text">
             💡 আপনার পার্সেল আইডি রিসিটে লেখা আছে। যেমন: CT000001
-        </p>
+        </div>
         
         <div id="result" class="result"></div>
+        
+        <div class="contact-info">
+            <h4>📞 যোগাযোগ করুন</h4>
+            <p>সমস্যা হলে কল করুন: <a href="tel:+8801700000000">০১৭০০-০০০০০০</a></p>
+            <p style="margin-top: 5px; font-size: 0.9em; color: #6c757d;">
+                অফিস সময়: সকাল ৯টা - সন্ধ্যা ৬টা
+            </p>
+        </div>
     </div>
 
     <script>
         let parcels = [];
+        let isLoading = false;
 
         function waitForFirebase(callback) {
             if (window.firebaseReady) callback();
             else setTimeout(() => waitForFirebase(callback), 100);
         }
 
-        // Load parcels
+        // Load parcels from Firebase
         waitForFirebase(() => {
             const parcelsRef = window.dbRef(window.db, 'parcels');
             window.dbOnValue(parcelsRef, (snapshot) => {
@@ -327,6 +440,7 @@
                         parcels.push({ key: child.key, ...child.val() });
                     });
                 }
+                console.log('Parcels loaded:', parcels.length);
             });
         });
 
@@ -339,20 +453,32 @@
                 return;
             }
             
-            const parcel = parcels.find(p => p.id === searchTerm);
+            // Show loading
+            resultDiv.innerHTML = `
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>খুঁজছি...</p>
+                </div>
+            `;
+            resultDiv.style.display = 'block';
             
-            if (parcel) {
-                displayParcelTracking(parcel);
-            } else {
-                resultDiv.innerHTML = `
-                    <div class="error">
-                        ❌ দুঃখিত! এই পার্সেল আইডি পাওয়া যায়নি।
-                        <br><br>
-                        অনুগ্রহ করে সঠিক আইডি লিখুন অথবা আমাদের সাথে যোগাযোগ করুন।
-                    </div>
-                `;
-                resultDiv.style.display = 'block';
-            }
+            // Simulate delay for better UX
+            setTimeout(() => {
+                const parcel = parcels.find(p => p.id === searchTerm);
+                
+                if (parcel) {
+                    displayParcelTracking(parcel);
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="error">
+                            <div class="error-icon">❌</div>
+                            <strong>দুঃখিত! এই পার্সেল আইডি পাওয়া যায়নি।</strong>
+                            <br><br>
+                            অনুগ্রহ করে সঠিক আইডি লিখুন অথবা আমাদের সাথে যোগাযোগ করুন।
+                        </div>
+                    `;
+                }
+            }, 500);
         }
 
         function displayParcelTracking(parcel) {
@@ -365,22 +491,32 @@
 
             const paymentText = parcel.paymentStatus === 'paid' ? '✅ পরিশোধিত' : '⏳ বাকি আছে';
             const currentLocation = parcel.currentLocation || 'ঢাকা অফিস';
+            
+            // Calculate progress percentage
+            const statusProgress = {
+                'pending': 25,
+                'loaded': 50,
+                'unloaded': 75,
+                'delivered': 100
+            }[parcel.status] || 25;
 
+            // Build timeline
             let timelineHtml = '';
             if (parcel.tracking && parcel.tracking.length > 0) {
                 timelineHtml = '<div class="timeline"><h3>📍 পার্সেল যাত্রাপথ</h3>';
-                parcel.tracking.slice().reverse().forEach(track => {
+                parcel.tracking.slice().reverse().forEach((track, index) => {
                     const icon = track.type === 'created' ? '📝' :
                                 track.type === 'loaded' ? '🚛' :
                                 track.type === 'unloaded' ? '📦' : '✅';
                     
                     timelineHtml += `
-                        <div class="timeline-item">
+                        <div class="timeline-item" style="animation: fadeIn 0.5s ${index * 0.1}s both;">
                             <div class="timeline-icon">${icon}</div>
                             <div class="timeline-content">
                                 <div class="timeline-title">${track.description}</div>
                                 ${track.location ? '<div class="timeline-location">📍 ' + track.location + '</div>' : ''}
-                                <div class="timeline-time">${track.time}</div>
+                                <div class="timeline-time">⏰ ${track.time}</div>
+                                ${track.by ? '<div class="timeline-time">👤 ' + track.by + '</div>' : ''}
                             </div>
                         </div>
                     `;
@@ -390,11 +526,17 @@
 
             const html = `
                 <div class="parcel-card">
-                    <div class="parcel-id">পার্সেল নং: ${parcel.id}</div>
+                    <div class="parcel-id">
+                        পার্সেল নং: ${parcel.id}
+                    </div>
+                    
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${statusProgress}%"></div>
+                    </div>
                     
                     <div class="status-box">
                         <h2>বর্তমান স্ট্যাটাস</h2>
-                        <p style="font-size: 1.3em; margin-top: 10px;">${statusText}</p>
+                        <div class="status-text">${statusText}</div>
                     </div>
                     
                     <div class="location-box">
@@ -404,30 +546,49 @@
                     
                     <div class="info-grid">
                         <div class="info-item">
-                            <div class="info-label">প্রেরক</div>
+                            <div class="info-label">👤 প্রেরক</div>
                             <div class="info-value">${parcel.senderName}</div>
+                            <div class="info-label" style="margin-top: 5px;">📱 ${parcel.senderPhone}</div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">প্রাপক</div>
+                            <div class="info-label">👤 প্রাপক</div>
                             <div class="info-value">${parcel.receiverName}</div>
+                            <div class="info-label" style="margin-top: 5px;">📱 ${parcel.receiverPhone}</div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">গন্তব্য</div>
+                            <div class="info-label">📍 গন্তব্য</div>
                             <div class="info-value">${parcel.destination}</div>
                         </div>
+                        ${parcel.weight ? `
                         <div class="info-item">
-                            <div class="info-label">ডেলিভারি চার্জ</div>
+                            <div class="info-label">⚖️ ওজন</div>
+                            <div class="info-value">${parcel.weight} কেজি</div>
+                        </div>
+                        ` : ''}
+                        <div class="info-item">
+                            <div class="info-label">💰 ডেলিভারি চার্জ</div>
                             <div class="info-value">${parcel.deliveryCharge} টাকা</div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">পেমেন্ট স্ট্যাটাস</div>
+                            <div class="info-label">💳 পেমেন্ট স্ট্যাটাস</div>
                             <div class="info-value">${paymentText}</div>
                         </div>
                         <div class="info-item">
-                            <div class="info-label">তারিখ</div>
+                            <div class="info-label">📅 তারিখ</div>
                             <div class="info-value">${parcel.date}</div>
                         </div>
+                        <div class="info-item">
+                            <div class="info-label">⏰ সময়</div>
+                            <div class="info-value">${parcel.time || 'N/A'}</div>
+                        </div>
                     </div>
+                    
+                    ${parcel.description ? `
+                    <div style="background: white; padding: 20px; border-radius: 12px; margin-top: 15px; border: 2px solid #e9ecef;">
+                        <div style="font-weight: 600; color: #6c757d; margin-bottom: 8px;">📝 বিবরণ</div>
+                        <div style="color: #2c3e50;">${parcel.description}</div>
+                    </div>
+                    ` : ''}
                     
                     ${timelineHtml}
                 </div>
@@ -438,6 +599,9 @@
             resultDiv.style.display = 'block';
             resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         }
+
+        // Auto-focus search input
+        document.getElementById('searchInput').focus();
     </script>
 </body>
 </html>
