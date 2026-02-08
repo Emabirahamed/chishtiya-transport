@@ -50,6 +50,10 @@
     <!-- Chart.js for Dashboard -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
+    <!-- jsPDF for PDF generation -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
@@ -451,25 +455,37 @@
         }
 
         /* Print Styles */
-        .print-area {
+        .receipt-container {
             background: white;
-            padding: 30px;
-            border-radius: 10px;
             max-width: 800px;
-            margin: 20px auto;
+            margin: 0 auto;
         }
         
         @media print {
-            body * { visibility: hidden; }
-            .print-area, .print-area * { visibility: visible; }
-            .print-area {
+            body * {
+                visibility: hidden;
+            }
+            
+            #receiptContent, #receiptContent * {
+                visibility: visible;
+            }
+            
+            #receiptContent {
                 position: absolute;
                 left: 0;
                 top: 0;
                 width: 100%;
-                padding: 20px;
+                padding: 20mm;
             }
-            .no-print { display: none !important; }
+            
+            .no-print {
+                display: none !important;
+            }
+            
+            @page {
+                size: A4;
+                margin: 0;
+            }
         }
 
         /* Modal */
@@ -489,6 +505,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
         
         .modal-content {
@@ -496,7 +513,7 @@
             padding: 30px;
             border-radius: 15px;
             max-width: 600px;
-            width: 90%;
+            width: 100%;
             max-height: 90vh;
             overflow-y: auto;
         }
@@ -561,19 +578,43 @@
             flex-wrap: wrap;
         }
         
-        .qr-code-container {
+        .receipt-print {
+            padding: 40px;
+            max-width: 21cm;
+            margin: 0 auto;
+            background: white;
+        }
+        
+        .receipt-header {
             text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #2a5298;
+            padding-bottom: 20px;
+        }
+        
+        .receipt-qr {
+            text-align: center;
+            margin: 20px 0;
             padding: 20px;
             background: #f8f9fa;
             border-radius: 10px;
-            margin: 20px 0;
         }
         
-        #parcelQR {
-            display: inline-block;
-            padding: 15px;
-            background: white;
-            border-radius: 10px;
+        .receipt-table {
+            width: 100%;
+            margin: 20px 0;
+            border-collapse: collapse;
+        }
+        
+        .receipt-table td {
+            padding: 10px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .receipt-table td:first-child {
+            font-weight: 600;
+            background: #f8f9fa;
+            width: 35%;
         }
     </style>
 </head>
@@ -681,20 +722,21 @@
                     <canvas id="statusChart" height="80"></canvas>
                 </div>
             </div>
-
-            <!-- Other tabs will be loaded dynamically -->
         </div>
     </div>
 
     <!-- Print Receipt Modal -->
     <div id="receiptModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header no-print">
                 <h2>📄 পার্সেল রিসিট</h2>
                 <span class="close-modal" onclick="closeModal('receiptModal')">&times;</span>
             </div>
-            <div id="receiptContent" class="print-area"></div>
-            <button class="btn btn-primary no-print" onclick="window.print()">🖨️ প্রিন্ট করুন</button>
+            <div id="receiptContent"></div>
+            <div class="no-print" style="margin-top: 20px; text-align: center;">
+                <button class="btn btn-primary" onclick="printReceipt()">🖨️ প্রিন্ট করুন</button>
+                <button class="btn btn-danger" onclick="closeModal('receiptModal')" style="margin-left: 10px;">❌ বন্ধ করুন</button>
+            </div>
         </div>
     </div>
 
@@ -707,6 +749,9 @@
         let html5QrCode = null;
         let weeklyChart = null;
         let statusChart = null;
+
+        // Destination list
+        const destinations = ['ফেনী', 'ছাগলনাইয়া', 'বসুরহাট', 'দাগনভূঁইয়া', 'মুরাদপুর'];
 
         // Wait for Firebase
         function waitForFirebase(callback) {
@@ -874,7 +919,10 @@
 
             const counterRef = window.dbRef(window.db, 'counter');
             window.dbOnValue(counterRef, (snap) => {
-                if (snap.exists()) counter = snap.val();
+                if (snap.exists()) {
+                    counter = snap.val();
+                    console.log('Counter loaded:', counter);
+                }
             });
 
             const parcelsRef = window.dbRef(window.db, 'parcels');
@@ -885,6 +933,7 @@
                         parcels.push({ key: child.key, ...child.val() });
                     });
                 }
+                console.log('Parcels loaded:', parcels.length);
                 
                 if (userRole === 'admin' || userRole === 'manager') {
                     updateDashboard();
@@ -897,8 +946,6 @@
 
         function loadAllTabs() {
             const contentArea = document.getElementById('contentArea');
-            
-            // Dashboard is already loaded
             
             // New Parcel Tab
             const newParcelTab = document.createElement('div');
@@ -932,18 +979,21 @@
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label>গন্তব্য *</label>
-                            <input type="text" id="destination" required>
+                            <label>গন্তব্য/মোকাম *</label>
+                            <select id="destination" required>
+                                <option value="">নির্বাচন করুন</option>
+                                ${destinations.map(d => `<option value="${d}">${d}</option>`).join('')}
+                            </select>
                         </div>
                         <div class="form-group">
                             <label>ওজন (কেজি)</label>
-                            <input type="number" id="weight" step="0.1">
+                            <input type="number" id="weight" step="0.1" placeholder="ঐচ্ছিক">
                         </div>
                     </div>
                     
                     <div class="form-row">
                         <div class="form-group">
-                            <label>ডেলিভারি চার্জ *</label>
+                            <label>ডেলিভারি চার্জ (টাকা) *</label>
                             <input type="number" id="deliveryCharge" required>
                         </div>
                         <div class="form-group">
@@ -956,8 +1006,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>বিবরণ</label>
-                        <textarea id="description" rows="3"></textarea>
+                        <label>বিবরণ (ঐচ্ছিক)</label>
+                        <textarea id="description" rows="3" placeholder="পার্সেলের বিস্তারিত তথ্য লিখুন"></textarea>
                     </div>
                     
                     <button type="submit" class="btn btn-primary">
@@ -1033,6 +1083,10 @@
             accountsTab.innerHTML = `
                 <h2 style="color: #2a5298; margin-bottom: 25px;">💰 হিসাব</h2>
                 
+                <div style="margin-bottom: 20px;">
+                    <button class="btn btn-primary" onclick="downloadAccountsPDF()">📥 PDF ডাউনলোড করুন</button>
+                </div>
+                
                 <div class="stats-grid">
                     <div class="stat-card green">
                         <div class="stat-label">মোট আয়</div>
@@ -1089,6 +1143,10 @@
                     </div>
                 </div>
                 
+                <div id="reportButtons" style="margin: 20px 0; display: none;">
+                    <button class="btn btn-success" onclick="downloadReportPDF()">📥 PDF ডাউনলোড করুন</button>
+                </div>
+                
                 <div id="reportResult" style="margin-top: 30px;"></div>
             `;
             contentArea.appendChild(reportsTab);
@@ -1102,7 +1160,7 @@
                     <h2 style="color: #2a5298; margin-bottom: 25px;">👥 ইউজার ম্যানেজমেন্ট</h2>
                     
                     <div style="background: #fff3cd; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
-                        <strong>নির্দেশনা:</strong> নতুন ইউজার যোগ করতে প্রথমে Firebase Authentication এ ইউজার তৈরি করুন,
+                        <strong>নির্দেশনা:</strong> নতুন ইউজার যোগ করতে প্রথমে Firebase Console এ গিয়ে ইউজার তৈরি করুন,
                         তারপর এখানে তাদের তথ্য যোগ করুন।
                     </div>
                     
@@ -1307,30 +1365,69 @@
         // Show Receipt
         function showReceipt(parcel) {
             const receiptContent = `
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <h2 style="color: #2a5298;">চিশতিয়া ট্রান্সপোর্ট</h2>
-                    <p>পার্সেল রিসিট</p>
+                <div class="receipt-print">
+                    <div class="receipt-header">
+                        <h1 style="color: #2a5298; margin-bottom: 10px;">চিশতিয়া ট্রান্সপোর্ট</h1>
+                        <p style="font-size: 1.2em;">পার্সেল রিসিট</p>
+                    </div>
+                    
+                    <div class="receipt-qr">
+                        <div id="parcelQR" style="display: inline-block;"></div>
+                        <p style="margin-top: 15px; font-weight: bold; font-size: 1.3em;">${parcel.id}</p>
+                    </div>
+                    
+                    <table class="receipt-table">
+                        <tr>
+                            <td>প্রেরক</td>
+                            <td>${parcel.senderName}</td>
+                        </tr>
+                        <tr>
+                            <td>প্রেরকের ফোন</td>
+                            <td>${parcel.senderPhone}</td>
+                        </tr>
+                        <tr>
+                            <td>প্রাপক</td>
+                            <td>${parcel.receiverName}</td>
+                        </tr>
+                        <tr>
+                            <td>প্রাপকের ফোন</td>
+                            <td>${parcel.receiverPhone}</td>
+                        </tr>
+                        <tr>
+                            <td>গন্তব্য</td>
+                            <td>${parcel.destination}</td>
+                        </tr>
+                        ${parcel.weight ? `
+                        <tr>
+                            <td>ওজন</td>
+                            <td>${parcel.weight} কেজি</td>
+                        </tr>
+                        ` : ''}
+                        <tr>
+                            <td>ডেলিভারি চার্জ</td>
+                            <td style="font-weight: bold; font-size: 1.1em;">${parcel.deliveryCharge} টাকা</td>
+                        </tr>
+                        <tr>
+                            <td>পেমেন্ট স্ট্যাটাস</td>
+                            <td>${parcel.paymentStatus === 'paid' ? '✅ পরিশোধিত' : '⏳ বাকি'}</td>
+                        </tr>
+                        <tr>
+                            <td>তারিখ ও সময়</td>
+                            <td>${parcel.date} ${parcel.time}</td>
+                        </tr>
+                    </table>
+                    
+                    ${parcel.description ? `
+                    <div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px;">
+                        <strong>বিবরণ:</strong> ${parcel.description}
+                    </div>
+                    ` : ''}
+                    
+                    <div style="margin-top: 30px; padding-top: 20px; border-top: 2px dashed #dee2e6; text-align: center; font-size: 0.9em; color: #6c757d;">
+                        <p>ট্র্যাকিং করুন: track.html পেজে আইডি লিখুন</p>
+                        <p style="margin-top: 10px;">ধন্যবাদ - চিশতিয়া ট্রান্সপোর্ট</p>
+                    </div>
                 </div>
-                
-                <div class="qr-code-container">
-                    <div id="parcelQR"></div>
-                    <p style="margin-top: 10px; font-weight: bold; font-size: 1.2em;">${parcel.id}</p>
-                </div>
-                
-                <table style="width: 100%; margin-top: 20px;">
-                    <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>প্রেরক:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${parcel.senderName}</td></tr>
-                    <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>ফোন:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${parcel.senderPhone}</td></tr>
-                    <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>প্রাপক:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${parcel.receiverName}</td></tr>
-                    <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>ফোন:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${parcel.receiverPhone}</td></tr>
-                    <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>গন্তব্য:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${parcel.destination}</td></tr>
-                    <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>চার্জ:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${parcel.deliveryCharge} টাকা</td></tr>
-                    <tr><td style="padding: 8px; border-bottom: 1px solid #ddd;"><strong>পেমেন্ট:</strong></td><td style="padding: 8px; border-bottom: 1px solid #ddd;">${parcel.paymentStatus === 'paid' ? 'পরিশোধিত' : 'বাকি'}</td></tr>
-                    <tr><td style="padding: 8px;"><strong>তারিখ:</strong></td><td style="padding: 8px;">${parcel.date} ${parcel.time}</td></tr>
-                </table>
-                
-                <p style="text-align: center; margin-top: 20px; font-size: 0.9em; color: #6c757d;">
-                    ট্র্যাকিং: https://yourwebsite.com/track.html
-                </p>
             `;
             
             document.getElementById('receiptContent').innerHTML = receiptContent;
@@ -1342,10 +1439,14 @@
                 qrDiv.innerHTML = '';
                 new QRCode(qrDiv, {
                     text: parcel.id,
-                    width: 200,
-                    height: 200
+                    width: 150,
+                    height: 150
                 });
             }, 100);
+        }
+
+        function printReceipt() {
+            window.print();
         }
 
         function closeModal(modalId) {
@@ -1358,6 +1459,11 @@
             if (!tbody) return;
             
             tbody.innerHTML = '';
+            
+            if (parcels.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; padding: 30px; color: #6c757d;">কোনো পার্সেল পাওয়া যায়নি</td></tr>';
+                return;
+            }
             
             const sortedParcels = [...parcels].reverse();
             
@@ -1374,7 +1480,6 @@
                     <td>
                         <div class="action-buttons">
                             <button class="btn btn-primary btn-sm" onclick="viewParcelDetails('${parcel.key}')">👁️ দেখুন</button>
-                            <button class="btn btn-warning btn-sm" onclick="editParcel('${parcel.key}')">✏️ এডিট</button>
                         </div>
                     </td>
                 `;
@@ -1405,11 +1510,7 @@
             const parcel = parcels.find(p => p.key === key);
             if (!parcel) return;
             
-            alert(`পার্সেল বিস্তারিত:\n\nআইডি: ${parcel.id}\nপ্রেরক: ${parcel.senderName}\nপ্রাপক: ${parcel.receiverName}\nগন্তব্য: ${parcel.destination}\nস্ট্যাটাস: ${getStatusText(parcel.status)}\nচার্জ: ${parcel.deliveryCharge} টাকা`);
-        }
-
-        function editParcel(key) {
-            alert('এডিট ফিচার শীঘ্রই যোগ করা হবে');
+            showReceipt(parcel);
         }
 
         // Scanner Functions
@@ -1539,21 +1640,25 @@
                 
                 const dueParcels = parcels.filter(p => p.paymentStatus === 'due');
                 
-                dueParcels.forEach(parcel => {
-                    const row = tbody.insertRow();
-                    row.innerHTML = `
-                        <td><strong>${parcel.id}</strong></td>
-                        <td>${parcel.senderName}</td>
-                        <td>${parcel.senderPhone}</td>
-                        <td>${parcel.deliveryCharge} টাকা</td>
-                        <td>${parcel.date}</td>
-                        <td>
-                            <button class="btn btn-success btn-sm" onclick="markAsPaid('${parcel.key}')">
-                                ✅ পরিশোধিত করুন
-                            </button>
-                        </td>
-                    `;
-                });
+                if (dueParcels.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; padding: 30px; color: #6c757d;">কোনো বাকি পার্সেল নেই</td></tr>';
+                } else {
+                    dueParcels.forEach(parcel => {
+                        const row = tbody.insertRow();
+                        row.innerHTML = `
+                            <td><strong>${parcel.id}</strong></td>
+                            <td>${parcel.senderName}</td>
+                            <td>${parcel.senderPhone}</td>
+                            <td>${parcel.deliveryCharge} টাকা</td>
+                            <td>${parcel.date}</td>
+                            <td>
+                                <button class="btn btn-success btn-sm" onclick="markAsPaid('${parcel.key}')">
+                                    ✅ পরিশোধিত করুন
+                                </button>
+                            </td>
+                        `;
+                    });
+                }
             }
         }
 
@@ -1571,12 +1676,55 @@
             }
         }
 
+        // Download Accounts PDF
+        function downloadAccountsPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.text('Chishtiya Transport - Accounts Report', 105, 15, { align: 'center' });
+            
+            const totalRevenue = parcels.reduce((sum, p) => sum + (parseInt(p.deliveryCharge) || 0), 0);
+            const paidAmount = parcels.filter(p => p.paymentStatus === 'paid')
+                .reduce((sum, p) => sum + (parseInt(p.deliveryCharge) || 0), 0);
+            const dueAmount = totalRevenue - paidAmount;
+            
+            doc.setFontSize(12);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Total Revenue: ${totalRevenue} Taka`, 20, 30);
+            doc.text(`Paid Amount: ${paidAmount} Taka`, 20, 40);
+            doc.text(`Due Amount: ${dueAmount} Taka`, 20, 50);
+            
+            const dueParcels = parcels.filter(p => p.paymentStatus === 'due');
+            
+            if (dueParcels.length > 0) {
+                const tableData = dueParcels.map(p => [
+                    p.id,
+                    p.senderName,
+                    p.senderPhone,
+                    p.deliveryCharge + ' Taka',
+                    p.date
+                ]);
+                
+                doc.autoTable({
+                    startY: 60,
+                    head: [['Parcel ID', 'Sender', 'Phone', 'Amount', 'Date']],
+                    body: tableData
+                });
+            }
+            
+            doc.save('accounts-report.pdf');
+        }
+
         // Reports Functions
         function updateReports() {
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('reportStartDate').value = today;
             document.getElementById('reportEndDate').value = today;
         }
+
+        let currentReportData = null;
 
         function generateReport() {
             const startDate = document.getElementById('reportStartDate').value;
@@ -1590,6 +1738,8 @@
             const filteredParcels = parcels.filter(p => {
                 return p.date >= startDate && p.date <= endDate;
             });
+            
+            currentReportData = filteredParcels;
             
             const total = filteredParcels.length;
             const delivered = filteredParcels.filter(p => p.status === 'delivered').length;
@@ -1631,7 +1781,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            ${filteredParcels.map(p => `
+                            ${filteredParcels.length > 0 ? filteredParcels.map(p => `
                                 <tr>
                                     <td><strong>${p.id}</strong></td>
                                     <td>${p.senderName}</td>
@@ -1641,13 +1791,69 @@
                                     <td><span class="badge badge-${p.status}">${getStatusText(p.status)}</span></td>
                                     <td>${p.date}</td>
                                 </tr>
-                            `).join('')}
+                            `).join('') : '<tr><td colspan="7" style="text-align: center; padding: 30px;">এই সময়কালে কোনো পার্সেল নেই</td></tr>'}
                         </tbody>
                     </table>
                 </div>
             `;
             
             document.getElementById('reportResult').innerHTML = reportHtml;
+            document.getElementById('reportButtons').style.display = 'block';
+        }
+
+        // Download Report PDF
+        function downloadReportPDF() {
+            if (!currentReportData) {
+                alert('প্রথমে রিপোর্ট তৈরি করুন');
+                return;
+            }
+            
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(16);
+            doc.text('Chishtiya Transport - Report', 105, 15, { align: 'center' });
+            
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+            
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Period: ${startDate} to ${endDate}`, 105, 25, { align: 'center' });
+            
+            const total = currentReportData.length;
+            const delivered = currentReportData.filter(p => p.status === 'delivered').length;
+            const revenue = currentReportData.reduce((sum, p) => sum + (parseInt(p.deliveryCharge) || 0), 0);
+            const paid = currentReportData.filter(p => p.paymentStatus === 'paid')
+                .reduce((sum, p) => sum + (parseInt(p.deliveryCharge) || 0), 0);
+            
+            doc.setFontSize(12);
+            doc.text(`Total Parcels: ${total}`, 20, 35);
+            doc.text(`Delivered: ${delivered}`, 20, 45);
+            doc.text(`Total Revenue: ${revenue} Taka`, 20, 55);
+            doc.text(`Paid Amount: ${paid} Taka`, 20, 65);
+            
+            if (currentReportData.length > 0) {
+                const tableData = currentReportData.map(p => [
+                    p.id,
+                    p.senderName,
+                    p.receiverName,
+                    p.destination,
+                    p.deliveryCharge,
+                    getStatusText(p.status),
+                    p.date
+                ]);
+                
+                doc.autoTable({
+                    startY: 75,
+                    head: [['ID', 'Sender', 'Receiver', 'Destination', 'Charge', 'Status', 'Date']],
+                    body: tableData,
+                    styles: { fontSize: 8 }
+                });
+            }
+            
+            doc.save(`report-${startDate}-to-${endDate}.pdf`);
         }
 
         // User Management Functions
