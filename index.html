@@ -876,8 +876,9 @@
                     <h2 style="margin-bottom: 25px; color: #2a5298;">পার্সেল খুঁজুন</h2>
                     <div class="search-box">
                         <span class="search-icon">🔍</span>
-                        <input type="text" id="searchInput" placeholder="পার্সেল আইডি লিখুন (যেমন: CT000001)" oninput="searchParcel()">
+                        <input type="text" id="searchInput" placeholder="পার্সেল আইডি বা মোবাইল নম্বর লিখুন" oninput="searchParcel()">
                     </div>
+                    <p style="color: #6c757d; margin-bottom: 20px;">💡 পার্সেল আইডি (যেমন: CT000001) অথবা মোবাইল নম্বর (যেমন: 01711223344) দিয়ে খুঁজুন</p>
                     <div id="searchResult"></div>
                 </div>
 
@@ -1023,7 +1024,7 @@
         }
 
         function searchParcel() {
-            const searchTerm = document.getElementById('searchInput').value.trim().toUpperCase();
+            const searchTerm = document.getElementById('searchInput').value.trim();
             const resultDiv = document.getElementById('searchResult');
             
             if (!searchTerm) {
@@ -1031,27 +1032,38 @@
                 return;
             }
             
-            const found = parcels.find(p => p.id === searchTerm);
+            // Search by ID or phone number
+            const found = parcels.filter(p => 
+                p.id.toUpperCase().includes(searchTerm.toUpperCase()) ||
+                p.senderPhone.includes(searchTerm) ||
+                p.receiverPhone.includes(searchTerm)
+            );
             
-            if (found) {
-                displayParcelDetails(found, resultDiv);
+            if (found.length > 0) {
+                let html = '';
+                if (found.length > 1) {
+                    html = `<h3 style="margin-bottom: 20px; color: #2a5298;">${found.length} টি পার্সেল পাওয়া গেছে</h3>`;
+                }
+                found.forEach(parcel => {
+                    html += getParcelCardHTML(parcel);
+                });
+                resultDiv.innerHTML = html;
             } else {
                 resultDiv.innerHTML = '<div class="no-data">❌ পার্সেল খুঁজে পাওয়া যায়নি</div>';
             }
         }
 
-        function displayParcelDetails(parcel, container) {
+        function getParcelCardHTML(parcel) {
             const statusText = {
                 'pending': 'পেন্ডিং',
                 'loaded': 'গাড়িতে তোলা',
-                'unloaded': 'গাড়ি থেকে নামানো',
+                'unloaded': 'নামানো',
                 'delivered': 'ডেলিভার্ড'
             }[parcel.status] || 'পেন্ডিং';
 
             const paymentText = parcel.paymentStatus === 'paid' ? '✅ পরিশোধিত' : '⏳ বাকি আছে';
             const currentLocation = parcel.currentLocation || 'ঢাকা অফিস';
 
-            // Build tracking history
             let trackingHtml = '';
             if (parcel.tracking && parcel.tracking.length > 0) {
                 trackingHtml = '<div style="margin-top: 20px; background: white; padding: 15px; border-radius: 8px;"><h4 style="margin-bottom: 15px; color: #2a5298;">📍 ট্র্যাকিং হিস্টরি</h4>';
@@ -1074,7 +1086,7 @@
                 trackingHtml += '</div>';
             }
 
-            container.innerHTML = `
+            return `
                 <div class="parcel-card">
                     <div class="parcel-id">${parcel.id}</div>
                     <div style="margin-bottom: 15px;">
@@ -1099,13 +1111,17 @@
                     
                     ${trackingHtml}
                     
-                    <div style="margin-top: 15px;">
+                    <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
                         ${parcel.paymentStatus === 'due' ? 
                             '<button class="btn btn-success" onclick="markAsPaid(\'' + parcel.key + '\')">💵 পরিশোধিত করুন</button>' : ''}
                         <button class="btn btn-info" onclick="showParcelInvoice(\'' + parcel.key + '\')">📄 Invoice দেখুন</button>
                     </div>
                 </div>
             `;
+        }
+
+        function displayParcelDetails(parcel, container) {
+            container.innerHTML = getParcelCardHTML(parcel);
         }
 
         function markAsPaid(key) {

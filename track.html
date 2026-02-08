@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>পার্সেল ট্র্যাকিং - চিশতিয়া ট্রান্সপোর্ট</title>
+    
+    <!-- Firebase v10 SDK -->
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyC2BMeBAU-7tLrBw0dKehAVix6mT9C4lWI",
+            authDomain: "chishtiya-transport.firebaseapp.com",
+            databaseURL: "https://chishtiya-transport-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "chishtiya-transport",
+            storageBucket: "chishtiya-transport.firebasestorage.app",
+            messagingSenderId: "796543197916",
+            appId: "1:796543197916:web:64a0e89d68280986a60a19"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+        
+        window.db = db;
+        window.dbRef = ref;
+        window.dbOnValue = onValue;
+        window.firebaseReady = true;
+    </script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Noto Sans Bengali', 'SolaimanLipi', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            color: #2a5298;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #6c757d;
+            font-size: 1.1em;
+        }
+        
+        .search-box {
+            position: relative;
+            margin-bottom: 30px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 20px 20px 20px 60px;
+            border: 3px solid #2a5298;
+            border-radius: 15px;
+            font-size: 1.3em;
+            font-family: 'Noto Sans Bengali', Arial, sans-serif;
+        }
+        
+        .search-box input:focus {
+            outline: none;
+            box-shadow: 0 0 0 4px rgba(42, 82, 152, 0.2);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.8em;
+        }
+        
+        .btn {
+            padding: 18px 40px;
+            border: none;
+            border-radius: 12px;
+            font-size: 1.2em;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: 'Noto Sans Bengali', Arial, sans-serif;
+            transition: all 0.3s;
+            width: 100%;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+        }
+        
+        .result {
+            margin-top: 30px;
+            display: none;
+        }
+        
+        .parcel-card {
+            background: #f8f9fa;
+            border: 3px solid #2a5298;
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+        
+        .parcel-id {
+            font-size: 2em;
+            font-weight: bold;
+            color: #2a5298;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .status-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .status-box h2 {
+            font-size: 1.8em;
+            margin-bottom: 10px;
+        }
+        
+        .location-box {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #2a5298;
+            margin-bottom: 25px;
+        }
+        
+        .location-box h3 {
+            color: #2a5298;
+            font-size: 1.3em;
+            margin-bottom: 10px;
+        }
+        
+        .location-box .location {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: #1e3c72;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .info-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .info-label {
+            font-weight: 600;
+            color: #6c757d;
+            font-size: 0.9em;
+            margin-bottom: 5px;
+        }
+        
+        .info-value {
+            font-size: 1.1em;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .timeline {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        
+        .timeline h3 {
+            color: #2a5298;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+        
+        .timeline-item {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 2px dashed #dee2e6;
+        }
+        
+        .timeline-item:last-child {
+            border-bottom: none;
+        }
+        
+        .timeline-icon {
+            font-size: 2em;
+            flex-shrink: 0;
+        }
+        
+        .timeline-content {
+            flex: 1;
+        }
+        
+        .timeline-title {
+            font-weight: bold;
+            font-size: 1.1em;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        
+        .timeline-location {
+            color: #2a5298;
+            font-weight: 600;
+            margin-bottom: 3px;
+        }
+        
+        .timeline-time {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #842029;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.1em;
+            border: 2px solid #842029;
+        }
+        
+        .status-badge {
+            display: inline-block;
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 1em;
+            font-weight: 600;
+        }
+        
+        .status-pending { background: #fff3cd; color: #856404; }
+        .status-loaded { background: #cfe2ff; color: #084298; }
+        .status-unloaded { background: #d4edda; color: #155724; }
+        .status-delivered { background: #d1e7dd; color: #0f5132; }
+        .payment-paid { background: #d1e7dd; color: #0f5132; }
+        .payment-due { background: #f8d7da; color: #842029; }
+        
+        .help-text {
+            text-align: center;
+            color: #6c757d;
+            margin-top: 20px;
+            font-size: 0.95em;
+        }
+        
+        @media (max-width: 768px) {
+            .container { padding: 25px; }
+            .header h1 { font-size: 2em; }
+            .search-box input { font-size: 1.1em; padding: 18px 18px 18px 55px; }
+            .info-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚛 চিশতিয়া ট্রান্সপোর্ট</h1>
+            <p>পার্সেল ট্র্যাকিং সিস্টেম</p>
+        </div>
+        
+        <div class="search-box">
+            <span class="search-icon">🔍</span>
+            <input type="text" id="searchInput" placeholder="পার্সেল আইডি লিখুন (যেমন: CT000001)" onkeypress="if(event.key==='Enter') trackParcel()">
+        </div>
+        
+        <button class="btn btn-primary" onclick="trackParcel()">
+            📦 পার্সেল খুঁজুন
+        </button>
+        
+        <p class="help-text">
+            💡 আপনার পার্সেল আইডি রিসিটে লেখা আছে। যেমন: CT000001
+        </p>
+        
+        <div id="result" class="result"></div>
+    </div>
+
+    <script>
+        let parcels = [];
+
+        function waitForFirebase(callback) {
+            if (window.firebaseReady) callback();
+            else setTimeout(() => waitForFirebase(callback), 100);
+        }
+
+        // Load parcels
+        waitForFirebase(() => {
+            const parcelsRef = window.dbRef(window.db, 'parcels');
+            window.dbOnValue(parcelsRef, (snapshot) => {
+                parcels = [];
+                if (snapshot.exists()) {
+                    snapshot.forEach(child => {
+                        parcels.push({ key: child.key, ...child.val() });
+                    });
+                }
+            });
+        });
+
+        function trackParcel() {
+            const searchTerm = document.getElementById('searchInput').value.trim().toUpperCase();
+            const resultDiv = document.getElementById('result');
+            
+            if (!searchTerm) {
+                alert('অনুগ্রহ করে পার্সেল আইডি লিখুন');
+                return;
+            }
+            
+            const parcel = parcels.find(p => p.id === searchTerm);
+            
+            if (parcel) {
+                displayParcelTracking(parcel);
+            } else {
+                resultDiv.innerHTML = `
+                    <div class="error">
+                        ❌ দুঃখিত! এই পার্সেল আইডি পাওয়া যায়নি।
+                        <br><br>
+                        অনুগ্রহ করে সঠিক আইডি লিখুন অথবা আমাদের সাথে যোগাযোগ করুন।
+                    </div>
+                `;
+                resultDiv.style.display = 'block';
+            }
+        }
+
+        function displayParcelTracking(parcel) {
+            const statusText = {
+                'pending': 'পেন্ডিং - প্রক্রিয়াধীন',
+                'loaded': 'গাড়িতে তোলা হয়েছে',
+                'unloaded': 'গন্তব্যে পৌঁছেছে',
+                'delivered': '✅ ডেলিভার্ড সম্পন্ন'
+            }[parcel.status] || 'পেন্ডিং';
+
+            const paymentText = parcel.paymentStatus === 'paid' ? '✅ পরিশোধিত' : '⏳ বাকি আছে';
+            const currentLocation = parcel.currentLocation || 'ঢাকা অফিস';
+
+            let timelineHtml = '';
+            if (parcel.tracking && parcel.tracking.length > 0) {
+                timelineHtml = '<div class="timeline"><h3>📍 পার্সেল যাত্রাপথ</h3>';
+                parcel.tracking.slice().reverse().forEach(track => {
+                    const icon = track.type === 'created' ? '📝' :
+                                track.type === 'loaded' ? '🚛' :
+                                track.type === 'unloaded' ? '📦' : '✅';
+                    
+                    timelineHtml += `
+                        <div class="timeline-item">
+                            <div class="timeline-icon">${icon}</div>
+                            <div class="timeline-content">
+                                <div class="timeline-title">${track.description}</div>
+                                ${track.location ? '<div class="timeline-location">📍 ' + track.location + '</div>' : ''}
+                                <div class="timeline-time">${track.time}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                timelineHtml += '</div>';
+            }
+
+            const html = `
+                <div class="parcel-card">
+                    <div class="parcel-id">পার্সেল নং: ${parcel.id}</div>
+                    
+                    <div class="status-box">
+                        <h2>বর্তমান স্ট্যাটাস</h2>
+                        <p style="font-size: 1.3em; margin-top: 10px;">${statusText}</p>
+                    </div>
+                    
+                    <div class="location-box">
+                        <h3>📍 বর্তমান অবস্থান</h3>
+                        <div class="location">${currentLocation}</div>
+                    </div>
+                    
+                    <div class="info-grid">
+                        <div class="info-item">
+                            <div class="info-label">প্রেরক</div>
+                            <div class="info-value">${parcel.senderName}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">প্রাপক</div>
+                            <div class="info-value">${parcel.receiverName}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">গন্তব্য</div>
+                            <div class="info-value">${parcel.destination}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">ডেলিভারি চার্জ</div>
+                            <div class="info-value">${parcel.deliveryCharge} টাকা</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">পেমেন্ট স্ট্যাটাস</div>
+                            <div class="info-value">${paymentText}</div>
+                        </div>
+                        <div class="info-item">
+                            <div class="info-label">তারিখ</div>
+                            <div class="info-value">${parcel.date}</div>
+                        </div>
+                    </div>
+                    
+                    ${timelineHtml}
+                </div>
+            `;
+            
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = html;
+            resultDiv.style.display = 'block';
+            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    </script>
+</body>
+</html>
