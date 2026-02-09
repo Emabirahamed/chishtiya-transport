@@ -3,37 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>পার্সেল ট্র্যাকিং - চিশতিয়া ট্রান্সপোর্ট</title>
-    
-    <!-- Firebase v10 SDK -->
-    <script type="module">
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-        
-        const firebaseConfig = {
-            apiKey: "AIzaSyC2BMeBAU-7tLrBw0dKehAVix6mT9C4lWI",
-            authDomain: "chishtiya-transport.firebaseapp.com",
-            databaseURL: "https://chishtiya-transport-default-rtdb.asia-southeast1.firebasedatabase.app",
-            projectId: "chishtiya-transport",
-            storageBucket: "chishtiya-transport.firebasestorage.app",
-            messagingSenderId: "796543197916",
-            appId: "1:796543197916:web:64a0e89d68280986a60a19"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
-        
-        window.db = db;
-        window.dbRef = ref;
-        window.dbOnValue = onValue;
-        window.firebaseReady = true;
-    </script>
-    
+    <title>চিশতিয়া ট্রান্সপোর্ট - পার্সেল ট্র্যাকিং</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
         
         body {
-            font-family: 'Noto Sans Bengali', 'SolaimanLipi', Arial, sans-serif;
+            font-family: 'Noto Sans Bengali', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             padding: 20px;
@@ -41,301 +22,340 @@
         
         .container {
             max-width: 900px;
-            margin: 50px auto;
-            background: white;
-            border-radius: 20px;
-            padding: 40px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            margin: 0 auto;
         }
         
         .header {
             text-align: center;
-            margin-bottom: 40px;
+            color: white;
+            margin-bottom: 30px;
+            animation: fadeIn 0.6s;
         }
         
         .header h1 {
-            color: #2a5298;
-            font-size: 2.5em;
+            font-size: 36px;
             margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
         }
         
         .header p {
-            color: #6c757d;
-            font-size: 1.1em;
+            font-size: 18px;
+            opacity: 0.95;
         }
         
         .search-box {
-            position: relative;
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             margin-bottom: 30px;
+            animation: fadeIn 0.6s 0.2s backwards;
         }
         
-        .search-box input {
-            width: 100%;
-            padding: 20px 20px 20px 60px;
-            border: 3px solid #2a5298;
-            border-radius: 15px;
-            font-size: 1.3em;
-            font-family: 'Noto Sans Bengali', Arial, sans-serif;
+        .search-form {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .search-input {
+            flex: 1;
+            min-width: 250px;
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            font-size: 18px;
+            font-family: 'Noto Sans Bengali', sans-serif;
             transition: all 0.3s;
         }
         
-        .search-box input:focus {
+        .search-input:focus {
             outline: none;
-            box-shadow: 0 0 0 4px rgba(42, 82, 152, 0.2);
+            border-color: #667eea;
+            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+        }
+        
+        .search-btn {
+            padding: 15px 35px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-family: 'Noto Sans Bengali', sans-serif;
+            white-space: nowrap;
+        }
+        
+        .search-btn:hover {
             transform: translateY(-2px);
         }
         
-        .search-icon {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.8em;
+        .search-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
         
-        .btn {
-            padding: 18px 40px;
-            border: none;
-            border-radius: 12px;
-            font-size: 1.2em;
-            font-weight: 600;
-            cursor: pointer;
-            font-family: 'Noto Sans Bengali', Arial, sans-serif;
-            transition: all 0.3s;
-            width: 100%;
-        }
-        
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0,0,0,0.2);
-        }
-        
-        .result {
-            margin-top: 30px;
-            display: none;
-            animation: fadeIn 0.5s;
-        }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .parcel-card {
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border: 3px solid #2a5298;
-            border-radius: 20px;
+        .result-card {
+            background: white;
             padding: 35px;
-            margin-bottom: 20px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            display: none;
+            animation: fadeIn 0.6s;
+        }
+        
+        .result-card.show {
+            display: block;
+        }
+        
+        .parcel-header {
+            text-align: center;
+            padding-bottom: 25px;
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 25px;
         }
         
         .parcel-id {
-            font-size: 2.2em;
-            font-weight: bold;
-            color: #2a5298;
-            text-align: center;
-            margin-bottom: 25px;
-            padding: 15px;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .status-box {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            margin-bottom: 25px;
-            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.3);
-        }
-        
-        .status-box h2 {
-            font-size: 1.8em;
+            font-size: 32px;
+            font-weight: 700;
+            color: #667eea;
             margin-bottom: 10px;
-        }
-        
-        .status-box .status-text {
-            font-size: 1.4em;
-            margin-top: 10px;
-            font-weight: 600;
-        }
-        
-        .location-box {
-            background: linear-gradient(135deg, #e7f3ff 0%, #d1e7ff 100%);
-            padding: 25px;
-            border-radius: 15px;
-            border-left: 5px solid #2a5298;
-            margin-bottom: 25px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-        
-        .location-box h3 {
-            color: #2a5298;
-            font-size: 1.3em;
-            margin-bottom: 10px;
-        }
-        
-        .location-box .location {
-            font-size: 1.6em;
-            font-weight: bold;
-            color: #1e3c72;
-        }
-        
-        .info-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-        
-        .info-item {
-            background: white;
-            padding: 18px;
-            border-radius: 12px;
-            border: 2px solid #e9ecef;
-            transition: all 0.3s;
-        }
-        
-        .info-item:hover {
-            border-color: #2a5298;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .info-label {
-            font-weight: 600;
-            color: #6c757d;
-            font-size: 0.95em;
-            margin-bottom: 8px;
-        }
-        
-        .info-value {
-            font-size: 1.15em;
-            color: #2c3e50;
-            font-weight: 600;
-        }
-        
-        .timeline {
-            background: white;
-            padding: 25px;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-        }
-        
-        .timeline h3 {
-            color: #2a5298;
-            margin-bottom: 25px;
-            font-size: 1.4em;
-            text-align: center;
-        }
-        
-        .timeline-item {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 25px;
-            padding: 20px;
-            background: #f8f9fa;
-            border-radius: 12px;
-            border-left: 4px solid #2a5298;
-            transition: all 0.3s;
-        }
-        
-        .timeline-item:hover {
-            background: #e9ecef;
-            transform: translateX(5px);
-        }
-        
-        .timeline-icon {
-            font-size: 2.2em;
-            flex-shrink: 0;
-        }
-        
-        .timeline-content {
-            flex: 1;
-        }
-        
-        .timeline-title {
-            font-weight: bold;
-            font-size: 1.15em;
-            color: #2c3e50;
-            margin-bottom: 8px;
-        }
-        
-        .timeline-location {
-            color: #2a5298;
-            font-weight: 600;
-            margin-bottom: 5px;
-            font-size: 1.05em;
-        }
-        
-        .timeline-time {
-            color: #6c757d;
-            font-size: 0.95em;
-        }
-        
-        .error {
-            background: linear-gradient(135deg, #f8d7da 0%, #f1aeb5 100%);
-            color: #842029;
-            padding: 30px;
-            border-radius: 15px;
-            text-align: center;
-            font-size: 1.2em;
-            border: 3px solid #842029;
-            box-shadow: 0 5px 20px rgba(132, 32, 41, 0.2);
-        }
-        
-        .error-icon {
-            font-size: 3em;
-            margin-bottom: 15px;
         }
         
         .status-badge {
             display: inline-block;
-            padding: 8px 20px;
-            border-radius: 20px;
-            font-size: 1em;
+            padding: 10px 25px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        
+        .status-pending { background: #FFF3E0; color: #F57C00; }
+        .status-loaded { background: #E3F2FD; color: #1976D2; }
+        .status-unloaded { background: #F3E5F5; color: #7B1FA2; }
+        .status-delivered { background: #E8F5E9; color: #388E3C; }
+        
+        .progress-container {
+            margin: 30px 0;
+        }
+        
+        .progress-label {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            border-radius: 10px;
+            transition: width 0.8s ease;
+            position: relative;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        .current-status {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            margin: 25px 0;
+            text-align: center;
+        }
+        
+        .current-status h3 {
+            font-size: 20px;
+            margin-bottom: 8px;
+        }
+        
+        .current-status p {
+            font-size: 16px;
+            opacity: 0.95;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        .info-item {
+            background: #f8f9fa;
+            padding: 18px;
+            border-radius: 12px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .info-label {
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+        
+        .info-value {
+            font-size: 16px;
+            color: #333;
             font-weight: 600;
         }
         
-        .status-pending { background: #fff3cd; color: #856404; }
-        .status-loaded { background: #cfe2ff; color: #084298; }
-        .status-unloaded { background: #d4edda; color: #155724; }
-        .status-delivered { background: #d1e7dd; color: #0f5132; }
-        .payment-paid { background: #d1e7dd; color: #0f5132; }
-        .payment-due { background: #f8d7da; color: #842029; }
+        .timeline-section {
+            margin-top: 35px;
+        }
         
-        .help-text {
-            text-align: center;
-            color: #6c757d;
-            margin-top: 20px;
-            font-size: 1em;
-            padding: 15px;
+        .timeline-section h3 {
+            font-size: 22px;
+            color: #333;
+            margin-bottom: 25px;
+            padding-bottom: 12px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .timeline {
+            position: relative;
+            padding-left: 40px;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 30px;
             background: #f8f9fa;
-            border-radius: 10px;
+            padding: 20px;
+            border-radius: 12px;
+            animation: slideIn 0.5s;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -33px;
+            top: 22px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: white;
+            border: 4px solid #667eea;
+            z-index: 1;
+        }
+        
+        .timeline-item:first-child::before {
+            background: #667eea;
+        }
+        
+        .timeline-icon {
+            font-size: 28px;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+        
+        .timeline-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .timeline-detail {
+            font-size: 15px;
+            color: #666;
+            margin: 6px 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .timeline-detail-icon {
+            font-size: 16px;
+        }
+        
+        .error-message {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.6s;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .error-icon {
+            font-size: 64px;
+            margin-bottom: 15px;
+        }
+        
+        .error-message h3 {
+            font-size: 24px;
+            color: #f44336;
+            margin-bottom: 10px;
+        }
+        
+        .error-message p {
+            font-size: 16px;
+            color: #666;
         }
         
         .loading {
             text-align: center;
             padding: 40px;
-            color: #6c757d;
+            display: none;
         }
         
-        .loading-spinner {
+        .loading.show {
+            display: block;
+        }
+        
+        .spinner {
             border: 4px solid #f3f3f3;
-            border-top: 4px solid #2a5298;
+            border-top: 4px solid #667eea;
             border-radius: 50%;
             width: 50px;
             height: 50px;
             animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+            margin: 0 auto 20px;
         }
         
         @keyframes spin {
@@ -343,49 +363,77 @@
             100% { transform: rotate(360deg); }
         }
         
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: #e9ecef;
-            border-radius: 10px;
-            overflow: hidden;
-            margin: 20px 0;
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
-            border-radius: 10px;
-            transition: width 0.5s;
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
         }
         
-        .contact-info {
-            background: linear-gradient(135deg, #d1e7ff 0%, #e7f3ff 100%);
-            padding: 20px;
-            border-radius: 12px;
+        .footer {
             text-align: center;
-            margin-top: 20px;
-            border: 2px solid #2a5298;
+            color: white;
+            margin-top: 40px;
+            opacity: 0.9;
+            font-size: 14px;
         }
         
-        .contact-info h4 {
-            color: #2a5298;
-            margin-bottom: 10px;
-        }
-        
-        .contact-info a {
-            color: #2a5298;
-            text-decoration: none;
-            font-weight: 600;
-        }
-        
+        /* Responsive */
         @media (max-width: 768px) {
-            .container { padding: 25px; }
-            .header h1 { font-size: 2em; }
-            .search-box input { font-size: 1.1em; padding: 18px 18px 18px 55px; }
-            .info-grid { grid-template-columns: 1fr; }
-            .parcel-id { font-size: 1.8em; }
-            .status-box h2 { font-size: 1.5em; }
+            .header h1 {
+                font-size: 28px;
+            }
+            
+            .header p {
+                font-size: 16px;
+            }
+            
+            .search-box {
+                padding: 20px;
+            }
+            
+            .search-form {
+                flex-direction: column;
+            }
+            
+            .search-input {
+                min-width: 100%;
+            }
+            
+            .search-btn {
+                width: 100%;
+            }
+            
+            .result-card {
+                padding: 25px;
+            }
+            
+            .parcel-id {
+                font-size: 24px;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .timeline {
+                padding-left: 30px;
+            }
         }
     </style>
 </head>
@@ -393,215 +441,355 @@
     <div class="container">
         <div class="header">
             <h1>🚛 চিশতিয়া ট্রান্সপোর্ট</h1>
-            <p>পার্সেল ট্র্যাকিং সিস্টেম</p>
+            <p>আপনার পার্সেল ট্র্যাকিং সিস্টেম</p>
         </div>
-        
+
         <div class="search-box">
-            <span class="search-icon">🔍</span>
-            <input type="text" id="searchInput" placeholder="পার্সেল আইডি লিখুন (যেমন: CT000001)" 
-                   onkeypress="if(event.key==='Enter') trackParcel()" autofocus>
+            <form class="search-form" id="searchForm">
+                <input 
+                    type="text" 
+                    class="search-input" 
+                    id="parcelIdInput" 
+                    placeholder="পার্সেল আইডি লিখুন (যেমন: CT000001)"
+                    required
+                >
+                <button type="submit" class="search-btn" id="searchBtn">
+                    🔍 পার্সেল খুঁজুন
+                </button>
+            </form>
         </div>
-        
-        <button class="btn btn-primary" onclick="trackParcel()">
-            📦 পার্সেল খুঁজুন
-        </button>
-        
-        <div class="help-text">
-            💡 আপনার পার্সেল আইডি রিসিটে লেখা আছে। যেমন: CT000001
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="color: white; font-size: 18px;">অনুগ্রহ করে অপেক্ষা করুন...</p>
         </div>
-        
-        <div id="result" class="result"></div>
-        
-        <div class="contact-info">
-            <h4>📞 যোগাযোগ করুন</h4>
-            <p>সমস্যা হলে কল করুন: <a href="tel:+8801700000000">০১৭০০-০০০০০০</a></p>
-            <p style="margin-top: 5px; font-size: 0.9em; color: #6c757d;">
-                অফিস সময়: সকাল ৯টা - সন্ধ্যা ৬টা
-            </p>
+
+        <div class="error-message" id="errorMessage">
+            <div class="error-icon">❌</div>
+            <h3>পার্সেল পাওয়া যায়নি!</h3>
+            <p>দয়া করে সঠিক পার্সেল আইডি দিয়ে আবার চেষ্টা করুন।</p>
+        </div>
+
+        <div class="result-card" id="resultCard">
+            <div class="parcel-header">
+                <div class="parcel-id" id="parcelId"></div>
+                <div class="status-badge" id="statusBadge"></div>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-label">ডেলিভারি প্রগতি</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill" style="width: 0%"></div>
+                </div>
+            </div>
+
+            <div class="current-status">
+                <h3>বর্তমান স্ট্যাটাস</h3>
+                <p id="currentStatusText"></p>
+            </div>
+
+            <div id="currentLocationDiv" style="text-align: center; margin: 20px 0; font-size: 18px; color: #667eea; display: none;">
+                <strong>📍 বর্তমান অবস্থান:</strong> <span id="currentLocation"></span><br>
+                <span id="vehicleInfo" style="display: none; margin-top: 8px; display: block;">
+                    <strong>🚛 গাড়ি নম্বর:</strong> <span id="vehicleNumber"></span>
+                </span>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-item">
+                    <div class="info-label">প্রেরকের নাম</div>
+                    <div class="info-value" id="senderName"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">প্রেরকের ফোন</div>
+                    <div class="info-value" id="senderPhone"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">প্রাপকের নাম</div>
+                    <div class="info-value" id="receiverName"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">প্রাপকের ফোন</div>
+                    <div class="info-value" id="receiverPhone"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">গন্তব্য</div>
+                    <div class="info-value" id="destination"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">ওজন</div>
+                    <div class="info-value" id="weight"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">ডেলিভারি চার্জ</div>
+                    <div class="info-value" id="charge"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">পেমেন্ট স্ট্যাটাস</div>
+                    <div class="info-value" id="paymentStatus"></div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">পার্সেল তৈরির তারিখ</div>
+                    <div class="info-value" id="createdDate"></div>
+                </div>
+            </div>
+
+            <div class="timeline-section">
+                <h3>📜 মুভমেন্ট হিস্ট্রি</h3>
+                <div class="timeline" id="timeline"></div>
+            </div>
+        </div>
+
+        <div class="footer">
+            <p>© ২০২৬ চিশতিয়া ট্রান্সপোর্ট। সর্বস্বত্ব সংরক্ষিত।</p>
         </div>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+
     <script>
-        let parcels = [];
-        let isLoading = false;
+        // Firebase Configuration (same as index.html)
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "YOUR_DATABASE_URL",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
 
-        function waitForFirebase(callback) {
-            if (window.firebaseReady) callback();
-            else setTimeout(() => waitForFirebase(callback), 100);
-        }
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
 
-        // Load parcels from Firebase
-        waitForFirebase(() => {
-            const parcelsRef = window.dbRef(window.db, 'parcels');
-            window.dbOnValue(parcelsRef, (snapshot) => {
-                parcels = [];
-                if (snapshot.exists()) {
-                    snapshot.forEach(child => {
-                        parcels.push({ key: child.key, ...child.val() });
-                    });
-                }
-                console.log('Parcels loaded:', parcels.length);
-            });
-        });
-
-        function trackParcel() {
-            const searchTerm = document.getElementById('searchInput').value.trim().toUpperCase();
-            const resultDiv = document.getElementById('result');
+        // Search Form Handler
+        document.getElementById('searchForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
             
-            if (!searchTerm) {
-                alert('অনুগ্রহ করে পার্সেল আইডি লিখুন');
+            const parcelId = document.getElementById('parcelIdInput').value.trim().toUpperCase();
+            
+            if (!parcelId) {
                 return;
             }
             
             // Show loading
-            resultDiv.innerHTML = `
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    <p>খুঁজছি...</p>
-                </div>
-            `;
-            resultDiv.style.display = 'block';
+            document.getElementById('loading').classList.add('show');
+            document.getElementById('resultCard').classList.remove('show');
+            document.getElementById('errorMessage').classList.remove('show');
             
-            // Simulate delay for better UX
-            setTimeout(() => {
-                const parcel = parcels.find(p => p.id === searchTerm);
+            try {
+                const snapshot = await database.ref('parcels/' + parcelId).once('value');
+                const parcel = snapshot.val();
+                
+                // Hide loading
+                document.getElementById('loading').classList.remove('show');
                 
                 if (parcel) {
-                    displayParcelTracking(parcel);
+                    displayParcel(parcel);
                 } else {
-                    resultDiv.innerHTML = `
-                        <div class="error">
-                            <div class="error-icon">❌</div>
-                            <strong>দুঃখিত! এই পার্সেল আইডি পাওয়া যায়নি।</strong>
-                            <br><br>
-                            অনুগ্রহ করে সঠিক আইডি লিখুন অথবা আমাদের সাথে যোগাযোগ করুন।
+                    document.getElementById('errorMessage').classList.add('show');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading').classList.remove('show');
+                document.getElementById('errorMessage').classList.add('show');
+            }
+        });
+
+        // Display Parcel Information
+        function displayParcel(parcel) {
+            // Hide error, show result
+            document.getElementById('errorMessage').classList.remove('show');
+            document.getElementById('resultCard').classList.add('show');
+            
+            // Basic Info
+            document.getElementById('parcelId').textContent = parcel.id;
+            document.getElementById('senderName').textContent = parcel.senderName;
+            document.getElementById('senderPhone').textContent = parcel.senderPhone;
+            document.getElementById('receiverName').textContent = parcel.receiverName;
+            document.getElementById('receiverPhone').textContent = parcel.receiverPhone;
+            document.getElementById('destination').textContent = parcel.destination;
+            document.getElementById('weight').textContent = parcel.weight ? parcel.weight + ' কেজি' : 'উল্লেখ নেই';
+            document.getElementById('charge').textContent = '৳' + parcel.charge;
+            document.getElementById('paymentStatus').textContent = parcel.paymentStatus;
+            document.getElementById('createdDate').textContent = formatDate(parcel.createdAt);
+            
+            // Status Badge
+            const statusText = getStatusText(parcel.status);
+            document.getElementById('statusBadge').textContent = statusText;
+            document.getElementById('statusBadge').className = 'status-badge status-' + parcel.status;
+            
+            // Current Status
+            document.getElementById('currentStatusText').textContent = statusText;
+            
+            // Current Location
+            if (parcel.currentLocation) {
+                document.getElementById('currentLocationDiv').style.display = 'block';
+                document.getElementById('currentLocation').textContent = parcel.currentLocation;
+                
+                if (parcel.vehicleNumber) {
+                    document.getElementById('vehicleInfo').style.display = 'block';
+                    document.getElementById('vehicleNumber').textContent = parcel.vehicleNumber;
+                } else {
+                    document.getElementById('vehicleInfo').style.display = 'none';
+                }
+            } else {
+                document.getElementById('currentLocationDiv').style.display = 'none';
+            }
+            
+            // Progress Bar
+            const progress = getProgress(parcel.status);
+            document.getElementById('progressFill').style.width = progress + '%';
+            
+            // Timeline
+            displayTimeline(parcel.tracking || []);
+            
+            // Scroll to result
+            document.getElementById('resultCard').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        // Display Timeline
+        function displayTimeline(tracking) {
+            const timeline = document.getElementById('timeline');
+            timeline.innerHTML = '';
+            
+            // Reverse to show latest first
+            const reversed = [...tracking].reverse();
+            
+            reversed.forEach((track, index) => {
+                const icon = getTrackingIcon(track.status);
+                
+                const item = document.createElement('div');
+                item.className = 'timeline-item';
+                item.style.animationDelay = (index * 0.1) + 's';
+                
+                let html = `
+                    <div class="timeline-icon">${icon}</div>
+                    <div class="timeline-title">${track.description}</div>
+                `;
+                
+                if (track.location) {
+                    html += `
+                        <div class="timeline-detail">
+                            <span class="timeline-detail-icon">📍</span>
+                            <span>${track.location}</span>
                         </div>
                     `;
                 }
-            }, 500);
+                
+                if (track.vehicleNumber) {
+                    html += `
+                        <div class="timeline-detail">
+                            <span class="timeline-detail-icon">🚛</span>
+                            <span>গাড়ি নম্বর: ${track.vehicleNumber}</span>
+                        </div>
+                    `;
+                }
+                
+                if (track.timestamp) {
+                    html += `
+                        <div class="timeline-detail">
+                            <span class="timeline-detail-icon">⏰</span>
+                            <span>${formatDateTime(track.timestamp)}</span>
+                        </div>
+                    `;
+                }
+                
+                if (track.user) {
+                    html += `
+                        <div class="timeline-detail">
+                            <span class="timeline-detail-icon">👤</span>
+                            <span>${track.user}</span>
+                        </div>
+                    `;
+                }
+                
+                item.innerHTML = html;
+                timeline.appendChild(item);
+            });
         }
 
-        function displayParcelTracking(parcel) {
-            const statusText = {
-                'pending': 'পেন্ডিং - প্রক্রিয়াধীন',
+        // Helper Functions
+        function getStatusText(status) {
+            const statuses = {
+                'pending': 'পেন্ডিং - অফিসে আছে',
                 'loaded': 'গাড়িতে তোলা হয়েছে',
-                'unloaded': 'গন্তব্যে পৌঁছেছে',
-                'delivered': '✅ ডেলিভার্ড সম্পন্ন'
-            }[parcel.status] || 'পেন্ডিং';
+                'unloaded': 'নামানো হয়েছে',
+                'delivered': 'ডেলিভার সম্পন্ন হয়েছে ✅'
+            };
+            return statuses[status] || status;
+        }
 
-            const paymentText = parcel.paymentStatus === 'paid' ? '✅ পরিশোধিত' : '⏳ বাকি আছে';
-            const currentLocation = parcel.currentLocation || 'ঢাকা অফিস';
-            
-            // Calculate progress percentage
-            const statusProgress = {
+        function getProgress(status) {
+            const progress = {
                 'pending': 25,
                 'loaded': 50,
                 'unloaded': 75,
                 'delivered': 100
-            }[parcel.status] || 25;
-
-            // Build timeline
-            let timelineHtml = '';
-            if (parcel.tracking && parcel.tracking.length > 0) {
-                timelineHtml = '<div class="timeline"><h3>📍 পার্সেল যাত্রাপথ</h3>';
-                parcel.tracking.slice().reverse().forEach((track, index) => {
-                    const icon = track.type === 'created' ? '📝' :
-                                track.type === 'loaded' ? '🚛' :
-                                track.type === 'unloaded' ? '📦' : '✅';
-                    
-                    timelineHtml += `
-                        <div class="timeline-item" style="animation: fadeIn 0.5s ${index * 0.1}s both;">
-                            <div class="timeline-icon">${icon}</div>
-                            <div class="timeline-content">
-                                <div class="timeline-title">${track.description}</div>
-                                ${track.location ? '<div class="timeline-location">📍 ' + track.location + '</div>' : ''}
-                                <div class="timeline-time">⏰ ${track.time}</div>
-                                ${track.by ? '<div class="timeline-time">👤 ' + track.by + '</div>' : ''}
-                            </div>
-                        </div>
-                    `;
-                });
-                timelineHtml += '</div>';
-            }
-
-            const html = `
-                <div class="parcel-card">
-                    <div class="parcel-id">
-                        পার্সেল নং: ${parcel.id}
-                    </div>
-                    
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${statusProgress}%"></div>
-                    </div>
-                    
-                    <div class="status-box">
-                        <h2>বর্তমান স্ট্যাটাস</h2>
-                        <div class="status-text">${statusText}</div>
-                    </div>
-                    
-                    <div class="location-box">
-                        <h3>📍 বর্তমান অবস্থান</h3>
-                        <div class="location">${currentLocation}</div>
-                    </div>
-                    
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <div class="info-label">👤 প্রেরক</div>
-                            <div class="info-value">${parcel.senderName}</div>
-                            <div class="info-label" style="margin-top: 5px;">📱 ${parcel.senderPhone}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">👤 প্রাপক</div>
-                            <div class="info-value">${parcel.receiverName}</div>
-                            <div class="info-label" style="margin-top: 5px;">📱 ${parcel.receiverPhone}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">📍 গন্তব্য</div>
-                            <div class="info-value">${parcel.destination}</div>
-                        </div>
-                        ${parcel.weight ? `
-                        <div class="info-item">
-                            <div class="info-label">⚖️ ওজন</div>
-                            <div class="info-value">${parcel.weight} কেজি</div>
-                        </div>
-                        ` : ''}
-                        <div class="info-item">
-                            <div class="info-label">💰 ডেলিভারি চার্জ</div>
-                            <div class="info-value">${parcel.deliveryCharge} টাকা</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">💳 পেমেন্ট স্ট্যাটাস</div>
-                            <div class="info-value">${paymentText}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">📅 তারিখ</div>
-                            <div class="info-value">${parcel.date}</div>
-                        </div>
-                        <div class="info-item">
-                            <div class="info-label">⏰ সময়</div>
-                            <div class="info-value">${parcel.time || 'N/A'}</div>
-                        </div>
-                    </div>
-                    
-                    ${parcel.description ? `
-                    <div style="background: white; padding: 20px; border-radius: 12px; margin-top: 15px; border: 2px solid #e9ecef;">
-                        <div style="font-weight: 600; color: #6c757d; margin-bottom: 8px;">📝 বিবরণ</div>
-                        <div style="color: #2c3e50;">${parcel.description}</div>
-                    </div>
-                    ` : ''}
-                    
-                    ${timelineHtml}
-                </div>
-            `;
-            
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = html;
-            resultDiv.style.display = 'block';
-            resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            };
+            return progress[status] || 0;
         }
 
-        // Auto-focus search input
-        document.getElementById('searchInput').focus();
+        function getTrackingIcon(status) {
+            const icons = {
+                'pending': '📝',
+                'loaded': '🚛',
+                'unloaded': '📦',
+                'delivered': '✅'
+            };
+            return icons[status] || '📍';
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            const options = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric'
+            };
+            return date.toLocaleDateString('bn-BD', options);
+        }
+
+        function formatDateTime(dateString) {
+            const date = new Date(dateString);
+            const dateOptions = { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric'
+            };
+            const timeOptions = {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: true
+            };
+            
+            const dateStr = date.toLocaleDateString('bn-BD', dateOptions);
+            const timeStr = date.toLocaleTimeString('bn-BD', timeOptions);
+            
+            return `${dateStr}, ${timeStr}`;
+        }
+
+        // Auto-search if parcel ID in URL
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const parcelId = urlParams.get('id');
+            
+            if (parcelId) {
+                document.getElementById('parcelIdInput').value = parcelId;
+                document.getElementById('searchForm').dispatchEvent(new Event('submit'));
+            }
+        });
+
+        // Enter key support
+        document.getElementById('parcelIdInput').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('searchForm').dispatchEvent(new Event('submit'));
+            }
+        });
     </script>
 </body>
 </html>
