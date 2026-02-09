@@ -1076,6 +1076,183 @@
             `;
             contentArea.appendChild(scannerTab);
 
+            <div id="scanner" class="tab-content">
+    <h2 style="margin-bottom: 25px; color: #2a5298;">📷 পার্সেল স্ক্যান করুন</h2>
+    
+    <!-- Vehicle Selection - নতুন -->
+    <div class="form-group" style="max-width: 600px; margin: 0 auto 30px;">
+        <label>গাড়ি নম্বর নির্বাচন করুন *</label>
+        <select id="scannerVehicle" style="font-size: 1.1em; padding: 15px;" required>
+            <option value="">গাড়ি নির্বাচন করুন</option>
+            <option value="ঢাকা-মেট্রো-গ-১২-৩৪৫৬">ঢাকা-মেট্রো-গ-১২-৩৪৫৬</option>
+            <option value="ঢাকা-মেট্রো-ঘ-৭৮-৯০১২">ঢাকা-মেট্রো-ঘ-৭৮-৯০১২</option>
+            <option value="ঢাকা-মেট্রো-চ-৩৪-৫৬৭৮">ঢাকা-মেট্রো-চ-৩৪-৫৬৭৮</option>
+        </select>
+    </div>
+    
+    <!-- QR Scanner -->
+    <div class="scanner-container">
+        <div id="reader" style="width: 100%; max-width: 500px; margin: 0 auto;"></div>
+        
+        <div style="text-align: center; margin: 20px 0;">
+            <button class="btn btn-primary" onclick="startScanning()" id="startScanBtn">
+                📷 ক্যামেরা চালু করুন
+            </button>
+            <button class="btn btn-danger hidden" onclick="stopScanning()" id="stopScanBtn">
+                ⏹️ বন্ধ করুন
+            </button>
+        </div>
+        
+        <!-- Manual Entry -->
+        <div style="max-width: 400px; margin: 20px auto;">
+            <div class="form-group">
+                <label>অথবা ম্যানুয়াল আইডি লিখুন:</label>
+                <input type="text" id="manualParcelId" placeholder="CT000001" 
+                       style="text-transform: uppercase;">
+            </div>
+            <button class="btn btn-success" onclick="processManualScan()" style="width: 100%;">
+                ✅ স্ক্যান করুন
+            </button>
+        </div>
+        
+        <div id="scannerResult" style="display: none;"></div>
+    </div>
+</div>
+            // Vehicle Report Tab
+            <div id="vehicle-report" class="tab-content">
+    <h2 style="margin-bottom: 25px; color: #2a5298;">🚗 গাড়ি ভিত্তিক রিপোর্ট</h2>
+    
+    <!-- Vehicle Selector -->
+    <div class="form-group" style="max-width: 400px; margin-bottom: 30px;">
+        <label>গাড়ি নির্বাচন করুন:</label>
+        <select id="reportVehicleSelect" onchange="loadVehicleReport()" 
+                style="font-size: 1.1em; padding: 12px;">
+            <option value="">সব গাড়ি</option>
+            <option value="ঢাকা-মেট্রো-গ-১২-৩৪৫৬">ঢাকা-মেট্রো-গ-১২-৩৪৫৬</option>
+            <option value="ঢাকা-মেট্রো-ঘ-৭৮-৯০১২">ঢাকা-মেট্রো-ঘ-৭৮-৯০১২</option>
+            <option value="ঢাকা-মেট্রো-চ-৩৪-৫৬৭৮">ঢাকা-মেট্রো-চ-৩৪-৫৬৭৮</option>
+        </select>
+    </div>
+    
+    <!-- Stats Cards -->
+    <div class="stats-grid" id="vehicleStatsGrid">
+        <div class="stat-card">
+            <h3 id="vehicleTotalParcels">0</h3>
+            <p>মোট পার্সেল</p>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+            <h3 id="vehicleLoadedParcels">0</h3>
+            <p>বর্তমানে গাড়িতে</p>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+            <h3 id="vehicleDeliveredParcels">0</h3>
+            <p>ডেলিভার্ড</p>
+        </div>
+        <div class="stat-card" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+            <h3 id="vehicleRevenue">০</h3>
+            <p>মোট আয় (টাকা)</p>
+        </div>
+    </div>
+    
+    <!-- Parcel List -->
+    <h3 style="margin: 30px 0 15px; color: #2a5298;">পার্সেল তালিকা</h3>
+    <div id="vehicleParcelList"></div>
+    
+    <!-- Export Button -->
+    <div style="text-align: center; margin-top: 30px;">
+        <button class="btn btn-primary" onclick="exportVehicleReport()">
+            📄 PDF রিপোর্ট ডাউনলোড করুন
+        </button>
+    </div>
+</div>
+function loadVehicleReport() {
+    const selectedVehicle = document.getElementById('reportVehicleSelect').value;
+    
+    let filteredParcels = parcels;
+    if (selectedVehicle) {
+        filteredParcels = parcels.filter(p => p.currentVehicle === selectedVehicle);
+    }
+    
+    // Stats
+    const total = filteredParcels.length;
+    const loaded = filteredParcels.filter(p => p.status === 'loaded').length;
+    const delivered = filteredParcels.filter(p => p.status === 'delivered').length;
+    const revenue = filteredParcels.reduce((sum, p) => sum + (parseInt(p.deliveryCharge) || 0), 0);
+    
+    document.getElementById('vehicleTotalParcels').textContent = total;
+    document.getElementById('vehicleLoadedParcels').textContent = loaded;
+    document.getElementById('vehicleDeliveredParcels').textContent = delivered;
+    document.getElementById('vehicleRevenue').textContent = revenue.toLocaleString('bn-BD');
+    
+    // Parcel List
+    const listDiv = document.getElementById('vehicleParcelList');
+    if (filteredParcels.length === 0) {
+        listDiv.innerHTML = '<div class="no-data">কোনো পার্সেল নেই</div>';
+        return;
+    }
+    
+    let html = '<table style="width: 100%; border-collapse: collapse;">';
+    html += `
+        <thead>
+            <tr style="background: #2a5298; color: white;">
+                <th style="padding: 12px; text-align: left;">পার্সেল আইডি</th>
+                <th style="padding: 12px; text-align: left;">প্রেরক</th>
+                <th style="padding: 12px; text-align: left;">গন্তব্য</th>
+                <th style="padding: 12px; text-align: left;">স্ট্যাটাস</th>
+                <th style="padding: 12px; text-align: right;">চার্জ</th>
+            </tr>
+        </thead>
+        <tbody>
+    `;
+    
+    filteredParcels.forEach((p, index) => {
+        const bgColor = index % 2 === 0 ? '#f8f9fa' : 'white';
+        const statusText = getStatusText(p.status);
+        html += `
+            <tr style="background: ${bgColor};">
+                <td style="padding: 10px;"><strong>${p.id}</strong></td>
+                <td style="padding: 10px;">${p.senderName}</td>
+                <td style="padding: 10px;">${p.destination}</td>
+                <td style="padding: 10px;">${statusText}</td>
+                <td style="padding: 10px; text-align: right;">${p.deliveryCharge} টাকা</td>
+            </tr>
+        `;
+    });
+    
+    html += '</tbody></table>';
+    listDiv.innerHTML = html;
+}
+
+function getStatusText(status) {
+    const statusMap = {
+        'pending': 'পেন্ডিং',
+        'loaded': 'গাড়িতে',
+        'unloaded': 'নামানো',
+        'delivered': 'ডেলিভার্ড'
+    };
+    return statusMap[status] || status;
+}
+            // vehicle-report tab
+            <div class="tabs">
+    <button class="tab visible active" id="tab-dashboard" onclick="showTab('dashboard')">
+        📊 ড্যাশবোর্ড
+    </button>
+    <button class="tab visible" id="tab-new-parcel" onclick="showTab('new-parcel')">
+        📦 নতুন পার্সেল
+    </button>
+    <button class="tab visible" id="tab-scanner" onclick="showTab('scanner')">
+        📷 স্ক্যান
+    </button>
+    <button class="tab visible" id="tab-parcel-list" onclick="showTab('parcel-list')">
+        📋 তালিকা
+    </button>
+    <button class="tab visible" id="tab-vehicle-report" onclick="showTab('vehicle-report')">
+        🚗 গাড়ি রিপোর্ট
+    </button>
+    <button class="tab visible" id="tab-accounts" onclick="showTab('accounts')">
+        💰 হিসাব
+    </button>
+</div>
             // Accounts Tab
             const accountsTab = document.createElement('div');
             accountsTab.id = 'accounts';
@@ -1566,6 +1743,111 @@
                 alert('❌ পার্সেল পাওয়া যায়নি: ' + parcelId);
                 return;
             }
+            const vehicleNumber = document.getElementById('scannerVehicle')?.value || 'N/A';
+    
+    let newStatus;
+    let description;
+    let location;
+    
+    if (userRole === 'delivery') {
+        newStatus = 'delivered';
+        description = 'পার্সেল ডেলিভার করা হয়েছে';
+        location = parcel.destination;
+    } else if (userRole === 'scanner') {
+        if (parcel.status === 'pending') {
+            newStatus = 'loaded';
+            description = 'গাড়িতে তোলা হয়েছে';
+            location = 'ঢাকা';
+        } else if (parcel.status === 'loaded') {
+            newStatus = 'unloaded';
+            description = 'গন্তব্যে পৌঁছেছে';
+            location = parcel.destination;
+        } else {
+            alert('এই পার্সেল ইতিমধ্যে প্রসেস হয়েছে');
+            return;
+        }
+    }
+    
+    try {
+        const now = new Date();
+        const trackingEntry = {
+            type: newStatus,
+            description: description,
+            location: location,
+            vehicleNumber: vehicleNumber,  // নতুন
+            time: now.toISOString().split('T')[0] + ' ' + now.toLocaleTimeString('bn-BD'),
+            by: currentUser.name,
+            timestamp: now.getTime()  // নতুন - sorting এর জন্য
+        };
+        
+        // CRITICAL FIX: Read first, then update
+        const parcelRef = window.dbRef(window.db, 'parcels/' + parcel.key);
+        const currentSnapshot = await window.dbGet(parcelRef);
+        
+        if (!currentSnapshot.exists()) {
+            alert('❌ ডাটাবেজে পার্সেল খুঁজে পাওয়া যায়নি!');
+            console.error('Parcel not found in database:', parcel.key);
+            return;
+        }
+        
+        const currentData = currentSnapshot.val();
+        const currentTracking = currentData.tracking || [];
+        
+        // Safe update - শুধু প্রয়োজনীয় fields
+        const updates = {
+            status: newStatus,
+            currentLocation: location,
+            currentVehicle: vehicleNumber,  // নতুন
+            tracking: [...currentTracking, trackingEntry],  // Append, not replace
+            lastUpdated: now.getTime()  // নতুন
+        };
+        
+        // Atomic update
+        await window.dbUpdate(parcelRef, updates);
+        
+        // Success message
+        const resultDiv = document.getElementById('scannerResult');
+        resultDiv.innerHTML = `
+            ✅ সফল!<br>
+            পার্সেল: ${parcelId}<br>
+            ${description}<br>
+            গাড়ি: ${vehicleNumber}
+        `;
+        resultDiv.style.display = 'block';
+        resultDiv.style.background = '#d1e7dd';
+        resultDiv.style.color = '#0f5132';
+        resultDiv.style.padding = '15px';
+        resultDiv.style.borderRadius = '8px';
+        resultDiv.style.marginTop = '15px';
+        
+        document.getElementById('manualParcelId').value = '';
+        
+        // Log for debugging
+        console.log('✅ Parcel updated successfully:', {
+            id: parcelId,
+            status: newStatus,
+            vehicle: vehicleNumber,
+            key: parcel.key
+        });
+        
+        setTimeout(() => {
+            resultDiv.style.display = 'none';
+        }, 3000);
+        
+    } catch (error) {
+        console.error('❌ Error updating parcel:', error);
+        alert('❌ আপডেট করতে সমস্যা হয়েছে: ' + error.message);
+        
+        // Error log করুন debugging এর জন্য
+        const errorLog = {
+            parcelId: parcelId,
+            error: error.message,
+            time: new Date().toISOString(),
+            user: currentUser.name
+        };
+        console.error('Error Log:', errorLog);
+    }
+}
             
             let newStatus;
             let description;
