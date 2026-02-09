@@ -1803,7 +1803,12 @@ function getStatusText(status) {
         };
         
         // Atomic update
-        await window.dbUpdate(parcelRef, updates);
+        const currentData = await window.dbGet(ref);
+if (currentData.exists()) {
+    await window.dbUpdate(ref, updates);
+} else {
+    console.error('Parcel not found in database');
+}
         
         // Success message
         const resultDiv = document.getElementById('scannerResult');
