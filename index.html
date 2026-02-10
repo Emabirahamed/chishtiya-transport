@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="চিশতিয়া ট্রান্সপোর্ট ম্যানেজমেন্ট সিস্টেম - পার্সেল ট্র্যাকিং ও ম্যানেজমেন্ট">
+    <link rel="icon" type="image/png" href="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAA7AAAAOwBeShxvQAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAAJASURBVFiF7ZdPSFRRFMZ/984bHRvNP6M4hQuJIiKCFkG0iNq0aBMRQbRo0aZFixYtglq0aBG0aBVEEEREixYRRJAQQf9A0MJRx3Ec33vn3tNiXjMz6rzRccZF3+pw33vn3O+ee+655wqllFKKP0wppdR/glLqP0H9NwH/CvBXgL8C/BXgrwB/Bfj/F+DvGxHy4Ax8egGph6A74PcDApx7AvgdQPGfEOCvOL2fIf0EUo9ALwI/CnoFVAm0Fl4rqJX/hIDSOwghwO+F4CCE+iE8CMEeSE5AcgJKc6DXQK9D9hlkp0EbUM3Qi/9EgGMIDAIfAX0YuAhcAq4A14AbiK5I7I1UxbZVZVLZBdTaf0KAqxmEy8XNv41blvlr23Ysyzp03jRNDMPAdV0OQ/0jAizLwvM89Ho9m5ubxONxYrEY0WiU/v5+BgYG6O3tZXh4mKGhIcbHxzFNs669fwSYponneRQKBZaXl1lcXCQSiTA2NsbIyAiDg4P09PQQjUZpb28nEAjUF/jmm/I87+BYWyqVMAyD+fl5JicniUQiLC0tsb29TaVSwTCMuhnQlADLsvA8j3w+z9raGvPz80xMTDA9Pc329jb5fB7P83Bdty79phPg+z6O47C7u8vMzAzT09PMzs5iGAae5+F5XlMz0HQCbNvGdV2y2Sxzc3PMzMywsLBAtVqlXC7jum7dz//VCbAsi3K5TKFQYGVlhdnZWWZmZojH42SzWUql0h/fhtufr+dvJeB3h/rsCjjq8OuO4KjDb/nrc7hpmv98BP/SL+g3OXRbsVKTZfwAAAAASUVORK5CYII=">
     <title>চিশতিয়া ট্রান্সপোর্ট - ম্যানেজমেন্ট</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap');
@@ -900,6 +902,14 @@
             }
         });
 
+        // Demo Mode Check
+        const DEMO_MODE = firebaseConfig.apiKey === "YOUR_API_KEY";
+        
+        if (DEMO_MODE) {
+            console.log('🔔 DEMO MODE: Firebase configuration not set');
+            showAlert('loginAlert', '⚠️ ডেমো মোড: Firebase configuration যোগ করুন অথবা demo@example.com / demo123 দিয়ে লগইন করুন', 'info');
+        }
+
         // Login
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
@@ -910,11 +920,59 @@
             btn.disabled = true;
             btn.textContent = 'লগইন হচ্ছে...';
             
+            // Demo Mode Login
+            if (DEMO_MODE && email === 'demo@example.com' && password === 'demo123') {
+                setTimeout(() => {
+                    // Create demo user
+                    currentUser = { 
+                        uid: 'demo-user', 
+                        email: 'demo@example.com',
+                        displayName: 'Demo Admin'
+                    };
+                    userRole = 'admin';
+                    
+                    document.getElementById('userName').textContent = 'Demo Admin';
+                    document.getElementById('userRole').textContent = 'ADMIN';
+                    document.getElementById('userRole').className = 'user-badge role-admin';
+                    document.getElementById('usersTab').style.display = 'block';
+                    
+                    document.getElementById('loginPage').style.display = 'none';
+                    document.getElementById('dashboardPage').style.display = 'block';
+                    
+                    showAlert('loginAlert', '✅ ডেমো মোডে লগইন সফল! (Firebase সেটআপ করলে সব ফিচার কাজ করবে)', 'success');
+                    
+                    // Load demo data
+                    loadDemoData();
+                }, 500);
+                return;
+            }
+            
             try {
+                // Check if Firebase is properly configured
+                if (DEMO_MODE) {
+                    throw new Error('Firebase configuration যোগ করুন। README.md দেখুন।');
+                }
+                
                 await auth.signInWithEmailAndPassword(email, password);
                 showAlert('loginAlert', 'সফলভাবে লগইন হয়েছে!', 'success');
             } catch (error) {
-                showAlert('loginAlert', 'লগইন ব্যর্থ: ' + error.message, 'error');
+                console.error('Login error:', error);
+                let errorMessage = 'লগইন ব্যর্থ: ';
+                
+                // Better error messages
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage += 'এই ইমেইল দিয়ে কোন ইউজার নেই';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage += 'ভুল পাসওয়ার্ড';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage += 'সঠিক ইমেইল লিখুন';
+                } else if (error.code === 'auth/network-request-failed') {
+                    errorMessage += 'ইন্টারনেট সংযোগ চেক করুন';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                showAlert('loginAlert', errorMessage, 'error');
                 btn.disabled = false;
                 btn.textContent = 'লগইন করুন';
             }
@@ -964,35 +1022,197 @@
             };
             
             try {
-                // Get counter
-                const counterRef = database.ref('counter');
-                const snapshot = await counterRef.once('value');
-                let counter = snapshot.val() || 0;
-                counter++;
+                if (DEMO_MODE) {
+                    // Demo Mode - Local storage
+                    const counter = allParcels.length + 1;
+                    const parcelId = 'CT' + counter.toString().padStart(6, '0');
+                    parcelData.id = parcelId;
+                    parcelData.tracking = [{
+                        status: 'pending',
+                        description: 'পার্সেল তৈরি করা হয়েছে',
+                        location: 'ঢাকা অফিস',
+                        timestamp: new Date().toISOString(),
+                        user: currentUser.displayName || currentUser.email
+                    }];
+                    
+                    allParcels.push(parcelData);
+                    displayDemoParcels();
+                    
+                    showAlert('addParcelAlert', '✅ পার্সেল সফলভাবে যোগ হয়েছে! পার্সেল আইডি: ' + parcelId + ' (ডেমো মোড - পেজ রিফ্রেশ করলে ডেটা মুছে যাবে)', 'success');
+                } else {
+                    // Firebase Mode
+                    const counterRef = database.ref('counter');
+                    const snapshot = await counterRef.once('value');
+                    let counter = snapshot.val() || 0;
+                    counter++;
+                    
+                    const parcelId = 'CT' + counter.toString().padStart(6, '0');
+                    parcelData.id = parcelId;
+                    
+                    // Add tracking history
+                    parcelData.tracking = [{
+                        status: 'pending',
+                        description: 'পার্সেল তৈরি করা হয়েছে',
+                        location: 'ঢাকা অফিস',
+                        timestamp: new Date().toISOString(),
+                        user: currentUser.displayName || currentUser.email
+                    }];
+                    
+                    // Save parcel
+                    await database.ref('parcels/' + parcelId).set(parcelData);
+                    await counterRef.set(counter);
+                    
+                    showAlert('addParcelAlert', 'পার্সেল সফলভাবে যোগ হয়েছে! পার্সেল আইডি: ' + parcelId, 'success');
+                    loadParcels();
+                }
                 
-                const parcelId = 'CT' + counter.toString().padStart(6, '0');
-                parcelData.id = parcelId;
-                
-                // Add tracking history
-                parcelData.tracking = [{
-                    status: 'pending',
-                    description: 'পার্সেল তৈরি করা হয়েছে',
-                    location: 'ঢাকা অফিস',
-                    timestamp: new Date().toISOString(),
-                    user: currentUser.displayName || currentUser.email
-                }];
-                
-                // Save parcel
-                await database.ref('parcels/' + parcelId).set(parcelData);
-                await counterRef.set(counter);
-                
-                showAlert('addParcelAlert', 'পার্সেল সফলভাবে যোগ হয়েছে! পার্সেল আইডি: ' + parcelId, 'success');
                 document.getElementById('addParcelForm').reset();
-                loadParcels();
             } catch (error) {
                 showAlert('addParcelAlert', 'এরর: ' + error.message, 'error');
             }
         });
+
+        // Load Demo Data (for testing without Firebase)
+        function loadDemoData() {
+            allParcels = [
+                {
+                    id: 'CT000001',
+                    senderName: 'রহিম উদ্দিন',
+                    senderPhone: '01711111111',
+                    receiverName: 'করিম মিয়া',
+                    receiverPhone: '01722222222',
+                    destination: 'ফেনী',
+                    weight: '2',
+                    charge: 150,
+                    paymentStatus: 'পরিশোধিত',
+                    status: 'delivered',
+                    currentLocation: 'ফেনী অফিস',
+                    vehicleNumber: 'ঢাকা-মেট্রো-গ-১২-৩৪৫৬',
+                    createdAt: new Date().toISOString(),
+                    createdBy: 'Demo Admin',
+                    description: 'ডেমো পার্সেল',
+                    tracking: [
+                        {
+                            status: 'pending',
+                            description: 'পার্সেল তৈরি করা হয়েছে',
+                            location: 'ঢাকা অফিস',
+                            timestamp: new Date(Date.now() - 86400000).toISOString(),
+                            user: 'Demo Admin'
+                        },
+                        {
+                            status: 'loaded',
+                            description: 'গাড়িতে তোলা হয়েছে',
+                            location: 'ঢাকা অফিস',
+                            vehicleNumber: 'ঢাকা-মেট্রো-গ-১২-৩৪৫৬',
+                            timestamp: new Date(Date.now() - 43200000).toISOString(),
+                            user: 'Demo Scanner'
+                        },
+                        {
+                            status: 'unloaded',
+                            description: 'নামানো হয়েছে',
+                            location: 'ফেনী অফিস',
+                            timestamp: new Date(Date.now() - 3600000).toISOString(),
+                            user: 'Demo Scanner'
+                        },
+                        {
+                            status: 'delivered',
+                            description: 'ডেলিভার সম্পন্ন হয়েছে',
+                            location: 'ফেনী অফিস',
+                            timestamp: new Date().toISOString(),
+                            user: 'Demo Scanner'
+                        }
+                    ]
+                },
+                {
+                    id: 'CT000002',
+                    senderName: 'সালাম মিয়া',
+                    senderPhone: '01733333333',
+                    receiverName: 'জামাল সাহেব',
+                    receiverPhone: '01744444444',
+                    destination: 'চট্টগ্রাম',
+                    weight: '5',
+                    charge: 250,
+                    paymentStatus: 'বাকি',
+                    status: 'loaded',
+                    currentLocation: 'ঢাকা - চট্টগ্রাম হাইওয়ে',
+                    vehicleNumber: 'ঢাকা-মেট্রো-ক-৯৮-৭৬৫৪',
+                    createdAt: new Date(Date.now() - 3600000).toISOString(),
+                    createdBy: 'Demo Manager',
+                    description: 'জরুরী পার্সেল',
+                    tracking: [
+                        {
+                            status: 'pending',
+                            description: 'পার্সেল তৈরি করা হয়েছে',
+                            location: 'ঢাকা অফিস',
+                            timestamp: new Date(Date.now() - 3600000).toISOString(),
+                            user: 'Demo Manager'
+                        },
+                        {
+                            status: 'loaded',
+                            description: 'গাড়িতে তোলা হয়েছে',
+                            location: 'ঢাকা অফিস',
+                            vehicleNumber: 'ঢাকা-মেট্রো-ক-৯৮-৭৬৫৪',
+                            timestamp: new Date(Date.now() - 1800000).toISOString(),
+                            user: 'Demo Scanner'
+                        }
+                    ]
+                },
+                {
+                    id: 'CT000003',
+                    senderName: 'আব্দুল্লাহ',
+                    senderPhone: '01755555555',
+                    receiverName: 'রশিদ মিয়া',
+                    receiverPhone: '01766666666',
+                    destination: 'সিলেট',
+                    weight: '1.5',
+                    charge: 120,
+                    paymentStatus: 'পরিশোধিত',
+                    status: 'pending',
+                    currentLocation: 'ঢাকা অফিস',
+                    vehicleNumber: '',
+                    createdAt: new Date().toISOString(),
+                    createdBy: 'Demo Admin',
+                    description: '',
+                    tracking: [
+                        {
+                            status: 'pending',
+                            description: 'পার্সেল তৈরি করা হয়েছে',
+                            location: 'ঢাকা অফিস',
+                            timestamp: new Date().toISOString(),
+                            user: 'Demo Admin'
+                        }
+                    ]
+                }
+            ];
+            
+            displayDemoParcels();
+        }
+        
+        // Display Demo Parcels
+        function displayDemoParcels() {
+            const tbody = document.getElementById('parcelTableBody');
+            tbody.innerHTML = '';
+            
+            allParcels.forEach(parcel => {
+                const row = tbody.insertRow();
+                row.innerHTML = `
+                    <td><strong>${parcel.id}</strong></td>
+                    <td>${parcel.senderName}<br><small>${parcel.senderPhone}</small></td>
+                    <td>${parcel.receiverName}<br><small>${parcel.receiverPhone}</small></td>
+                    <td>${parcel.destination}</td>
+                    <td>৳${parcel.charge}</td>
+                    <td><span class="status-badge status-${parcel.status}">${getStatusText(parcel.status)}</span></td>
+                    <td>${formatDate(parcel.createdAt)}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-sm btn-view" onclick="viewParcel('${parcel.id}')">👁️ দেখুন</button>
+                            <button class="btn-sm btn-qr" onclick="showQR('${parcel.id}')">QR</button>
+                            <button class="btn-sm btn-delete" onclick="deleteParcel('${parcel.id}')">🗑️ মুছুন</button>
+                        </div>
+                    </td>
+                `;
+            });
+        }
 
         // Load Parcels
         function loadParcels() {
@@ -1071,8 +1291,14 @@
 
         // View Parcel Details
         async function viewParcel(parcelId) {
-            const snapshot = await database.ref('parcels/' + parcelId).once('value');
-            const parcel = snapshot.val();
+            let parcel;
+            
+            if (DEMO_MODE) {
+                parcel = allParcels.find(p => p.id === parcelId);
+            } else {
+                const snapshot = await database.ref('parcels/' + parcelId).once('value');
+                parcel = snapshot.val();
+            }
             
             if (!parcel) return;
             
