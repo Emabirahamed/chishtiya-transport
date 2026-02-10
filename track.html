@@ -566,126 +566,6 @@
         // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        
-        // Demo Mode Check
-        const DEMO_MODE = firebaseConfig.apiKey === "YOUR_API_KEY";
-        
-        // Demo Data
-        const demoParcels = {
-            'CT000001': {
-                id: 'CT000001',
-                senderName: 'রহিম উদ্দিন',
-                senderPhone: '01711111111',
-                receiverName: 'করিম মিয়া',
-                receiverPhone: '01722222222',
-                destination: 'ফেনী ছাগলনাইয়া বসুরহাট দাগনভূঞা মুরাদপুর',
-                weight: '2',
-                charge: 150,
-                paymentStatus: 'পরিশোধিত',
-                status: 'delivered',
-                currentLocation: 'ফেনী অফিস',
-                vehicleNumber: 'ঢাকা-মেট্রো-গ-১২-৩৪৫৬',
-                createdAt: new Date(Date.now() - 86400000).toISOString(),
-                createdBy: 'Demo Admin',
-                description: 'ডেমো পার্সেল - Firebase সেটআপ করলে আসল ডেটা দেখবেন',
-                tracking: [
-                    {
-                        status: 'pending',
-                        description: 'পার্সেল তৈরি করা হয়েছে',
-                        location: 'ঢাকা অফিস',
-                        timestamp: new Date(Date.now() - 86400000).toISOString(),
-                        user: 'Demo Admin'
-                    },
-                    {
-                        status: 'loaded',
-                        description: 'গাড়িতে তোলা হয়েছে',
-                        location: 'ঢাকা অফিস',
-                        vehicleNumber: 'ঢাকা-মেট্রো-গ-১২-৩৪৫৬',
-                        timestamp: new Date(Date.now() - 43200000).toISOString(),
-                        user: 'Demo Scanner'
-                    },
-                    {
-                        status: 'unloaded',
-                        description: 'নামানো হয়েছে',
-                        location: 'ফেনী অফিস',
-                        timestamp: new Date(Date.now() - 3600000).toISOString(),
-                        user: 'Demo Scanner'
-                    },
-                    {
-                        status: 'delivered',
-                        description: 'ডেলিভার সম্পন্ন হয়েছে',
-                        location: 'ফেনী অফিস',
-                        timestamp: new Date().toISOString(),
-                        user: 'Demo Delivery'
-                    }
-                ]
-            },
-            'CT000002': {
-                id: 'CT000002',
-                senderName: 'সালাম মিয়া',
-                senderPhone: '01733333333',
-                receiverName: 'জামাল সাহেব',
-                receiverPhone: '01744444444',
-                destination: 'চট্টগ্রাম',
-                weight: '5',
-                charge: 250,
-                paymentStatus: 'বাকি',
-                status: 'loaded',
-                currentLocation: 'ঢাকা - চট্টগ্রাম হাইওয়ে',
-                vehicleNumber: 'ঢাকা-মেট্রো-ক-৯৮-৭৬৫৪',
-                createdAt: new Date(Date.now() - 3600000).toISOString(),
-                createdBy: 'Demo Manager',
-                description: 'জরুরী পার্সেল',
-                tracking: [
-                    {
-                        status: 'pending',
-                        description: 'পার্সেল তৈরি করা হয়েছে',
-                        location: 'ঢাকা অফিস',
-                        timestamp: new Date(Date.now() - 3600000).toISOString(),
-                        user: 'Demo Manager'
-                    },
-                    {
-                        status: 'loaded',
-                        description: 'গাড়িতে তোলা হয়েছে',
-                        location: 'ঢাকা অফিস',
-                        vehicleNumber: 'ঢাকা-মেট্রো-ক-৯৮-৭৬৫৪',
-                        timestamp: new Date(Date.now() - 1800000).toISOString(),
-                        user: 'Demo Scanner'
-                    }
-                ]
-            },
-            'CT000003': {
-                id: 'CT000003',
-                senderName: 'আব্দুল্লাহ',
-                senderPhone: '01755555555',
-                receiverName: 'রশিদ মিয়া',
-                receiverPhone: '01766666666',
-                destination: 'সিলেট',
-                weight: '1.5',
-                charge: 120,
-                paymentStatus: 'পরিশোধিত',
-                status: 'pending',
-                currentLocation: 'ঢাকা অফিস',
-                vehicleNumber: '',
-                createdAt: new Date().toISOString(),
-                createdBy: 'Demo Admin',
-                description: '',
-                tracking: [
-                    {
-                        status: 'pending',
-                        description: 'পার্সেল তৈরি করা হয়েছে',
-                        location: 'ঢাকা অফিস',
-                        timestamp: new Date().toISOString(),
-                        user: 'Demo Admin'
-                    }
-                ]
-            }
-        };
-        
-        if (DEMO_MODE) {
-            console.log('🔔 DEMO MODE: Firebase configuration not set');
-            console.log('📝 Try parcel IDs: CT000001, CT000002, CT000003');
-        }
 
         // Search Form Handler
         document.getElementById('searchForm').addEventListener('submit', async (e) => {
@@ -703,46 +583,17 @@
             document.getElementById('errorMessage').classList.remove('show');
             
             try {
-                let parcel;
-                
-                if (DEMO_MODE) {
-                    // Demo Mode - use demo data
-                    parcel = demoParcels[parcelId];
-                    
-                    if (!parcel) {
-                        // Show available demo IDs
-                        document.getElementById('loading').classList.remove('show');
-                        document.getElementById('errorMessage').classList.add('show');
-                        document.getElementById('errorMessage').innerHTML = `
-                            <div class="error-icon">❌</div>
-                            <h3>পার্সেল পাওয়া যায়নি!</h3>
-                            <p>ডেমো মোডে এই পার্সেল আইডি গুলো ব্যবহার করুন:</p>
-                            <p><strong>CT000001</strong> (ডেলিভার্ড)<br>
-                            <strong>CT000002</strong> (গাড়িতে আছে)<br>
-                            <strong>CT000003</strong> (পেন্ডিং)</p>
-                            <p style="margin-top: 15px; color: #666;">
-                            Firebase সেটআপ করলে আসল ডেটা দেখতে পারবেন।<br>
-                            <small>LOGIN_TROUBLESHOOTING.md ফাইল দেখুন।</small>
-                            </p>
-                        `;
-                        return;
-                    }
-                } else {
-                    // Firebase Mode
-                    const snapshot = await database.ref('parcels/' + parcelId).once('value');
-                    parcel = snapshot.val();
-                    
-                    if (!parcel) {
-                        document.getElementById('loading').classList.remove('show');
-                        document.getElementById('errorMessage').classList.add('show');
-                        return;
-                    }
-                }
+                const snapshot = await database.ref('parcels/' + parcelId).once('value');
+                const parcel = snapshot.val();
                 
                 // Hide loading
                 document.getElementById('loading').classList.remove('show');
                 
-                displayParcel(parcel);
+                if (parcel) {
+                    displayParcel(parcel);
+                } else {
+                    document.getElementById('errorMessage').classList.add('show');
+                }
             } catch (error) {
                 console.error('Error:', error);
                 document.getElementById('loading').classList.remove('show');
