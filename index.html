@@ -378,11 +378,25 @@
         }
 
         #qr-reader {
-            max-width: 500px;
+            max-width: 600px;
             margin: 0 auto;
             border: 3px solid #667eea;
             border-radius: 15px;
             overflow: hidden;
+        }
+
+        #qr-reader video {
+            width: 100%;
+            border-radius: 12px;
+        }
+
+        .qr-helper {
+            text-align: center;
+            margin-top: 15px;
+            padding: 15px;
+            background: #fff3cd;
+            border-radius: 10px;
+            color: #856404;
         }
 
         .search-box {
@@ -823,6 +837,13 @@
                     <button class="btn" onclick="stopScanner()" id="stopScanBtn" style="display: none; background: #dc3545;">স্ক্যানার বন্ধ করুন</button>
                 </div>
                 <div id="qr-reader"></div>
+                <div class="qr-helper" id="qrHelper" style="display: none;">
+                    <strong>💡 Tips:</strong><br>
+                    • QR কোড box এর মধ্যে রাখুন<br>
+                    • ভালো আলোতে স্ক্যান করুন<br>
+                    • Camera থেকে 10-15 cm দূরত্বে রাখুন<br>
+                    • QR কোড সমতল রাখুন (বাঁকানো নয়)
+                </div>
             </div>
             
             <div id="scanResult" style="margin-top: 20px;"></div>
@@ -1290,13 +1311,27 @@
         window.startScanner = () => {
             document.getElementById('startScanBtn').style.display = 'none';
             document.getElementById('stopScanBtn').style.display = 'inline-block';
+            document.getElementById('scanResult').innerHTML = ''; // Clear previous results
+            document.getElementById('qrHelper').style.display = 'block'; // Show helper
 
             html5QrCode = new Html5Qrcode("qr-reader");
             
+            // Better configuration for QR detection
+            const config = {
+                fps: 10,
+                qrbox: { width: 250, height: 250 },
+                aspectRatio: 1.0,
+                disableFlip: false,
+                experimentalFeatures: {
+                    useBarCodeDetectorIfSupported: true
+                }
+            };
+            
             html5QrCode.start(
                 { facingMode: "environment" },
-                { fps: 10, qrbox: 250 },
-                onScanSuccess
+                config,
+                onScanSuccess,
+                onScanError
             ).catch(err => {
                 console.error('Scanner error:', err);
                 document.getElementById('scanResult').innerHTML = `
@@ -1307,7 +1342,13 @@
                 `;
                 document.getElementById('startScanBtn').style.display = 'inline-block';
                 document.getElementById('stopScanBtn').style.display = 'none';
+                document.getElementById('qrHelper').style.display = 'none';
             });
+        };
+
+        function onScanError(errorMessage) {
+            // Ignore scan errors (continuous scanning)
+            // console.log('Scanning...', errorMessage);
         };
 
         window.stopScanner = () => {
@@ -1315,14 +1356,17 @@
                 html5QrCode.stop().then(() => {
                     document.getElementById('startScanBtn').style.display = 'inline-block';
                     document.getElementById('stopScanBtn').style.display = 'none';
+                    document.getElementById('qrHelper').style.display = 'none';
                 }).catch(err => {
                     console.error('Stop scanner error:', err);
                     document.getElementById('startScanBtn').style.display = 'inline-block';
                     document.getElementById('stopScanBtn').style.display = 'none';
+                    document.getElementById('qrHelper').style.display = 'none';
                 });
             } else {
                 document.getElementById('startScanBtn').style.display = 'inline-block';
                 document.getElementById('stopScanBtn').style.display = 'none';
+                document.getElementById('qrHelper').style.display = 'none';
             }
         };
 
