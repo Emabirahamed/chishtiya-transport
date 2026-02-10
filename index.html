@@ -942,7 +942,10 @@
             });
         }
 
-        if (!currentUserData) {
+        window.addParcel = async (e) => {
+            e.preventDefault();
+            
+            if (!currentUserData) {
                 alert('অনুগ্রহ করে লগইন করুন!');
                 return;
             }
@@ -972,7 +975,7 @@
                     status: 'পার্সেল তৈরি করা হয়েছে',
                     location: 'ঢাকা অফিস',
                     timestamp: new Date().toISOString(),
-                    user: currentUserData.name
+                    user: currentUserData.name || 'Unknown'
                 }]
             };
 
@@ -1155,7 +1158,8 @@
             document.getElementById('stopScanBtn').style.display = 'inline-block';
 
             html5QrCode = new Html5Qrcode("qr-reader");
-          html5QrCode.start(
+            
+            html5QrCode.start(
                 { facingMode: "environment" },
                 { fps: 10, qrbox: 250 },
                 onScanSuccess
@@ -1274,10 +1278,12 @@
                 alert('অবস্থান লিখুন!');
                 return;
             }
+
             if (!currentUserData) {
                 alert('অনুগ্রহ করে লগইন করুন!');
                 return;
             }
+
             const parcelRef = ref(database, 'parcels/' + parcelId);
             const snapshot = await get(parcelRef);
             const parcel = snapshot.val();
