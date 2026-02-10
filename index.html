@@ -554,49 +554,50 @@
                 flex-direction: column;
             }
         }
-        
-        /* Print Sticker Styles */
+
+        /* Print Sticker Styles - 3x3 inch */
         .print-sticker {
             background: white;
-            padding: 30px;
-            max-width: 400px;
+            padding: 12px;
+            max-width: 280px;
             margin: 0 auto;
-            border: 3px dashed #667eea;
-            border-radius: 10px;
+            border: 2px dashed #667eea;
+            border-radius: 8px;
         }
 
         .sticker-header {
             text-align: center;
-            border-bottom: 3px solid #667eea;
-            padding-bottom: 15px;
-            margin-bottom: 20px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 6px;
+            margin-bottom: 8px;
         }
 
         .sticker-header h2 {
             color: #667eea;
-            margin-bottom: 5px;
-            font-size: 24px;
+            margin-bottom: 2px;
+            font-size: 14px;
         }
 
         .sticker-header p {
             color: #666;
-            font-size: 14px;
+            font-size: 9px;
         }
 
         .sticker-qr {
             text-align: center;
-            margin: 20px 0;
+            margin: 8px 0;
         }
 
         .sticker-info {
-            margin: 15px 0;
+            margin: 8px 0;
         }
 
         .sticker-row {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
+            padding: 2px 0;
             border-bottom: 1px dotted #ddd;
+            font-size: 10px;
         }
 
         .sticker-label {
@@ -606,18 +607,23 @@
 
         .sticker-value {
             color: #666;
+            text-align: right;
         }
 
         .sticker-footer {
             text-align: center;
-            margin-top: 20px;
-            padding-top: 15px;
-            border-top: 3px solid #667eea;
-            font-size: 12px;
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 2px solid #667eea;
+            font-size: 8px;
             color: #999;
         }
 
         @media print {
+            @page {
+                size: 3in 3in;
+                margin: 0;
+            }
             body * {
                 visibility: hidden;
             }
@@ -637,9 +643,18 @@
                 box-shadow: none !important;
                 margin: 0 !important;
                 max-width: 100% !important;
+                padding: 0 !important;
             }
             .modal-close, .btn {
                 display: none !important;
+            }
+            .print-sticker {
+                border: 2px dashed #667eea;
+                max-width: 100%;
+                width: 3in;
+                height: 3in;
+                box-sizing: border-box;
+                padding: 12px;
             }
         }
     </style>
@@ -788,12 +803,28 @@
 
         <!-- Tab 3: Scan Parcel -->
         <div class="tab-content" id="tab3">
-            <h2>QR কোড স্ক্যান করুন</h2>
-            <div style="text-align: center; margin-bottom: 20px;">
-                <button class="btn" onclick="startScanner()" id="startScanBtn">স্ক্যানার চালু করুন</button>
-                <button class="btn" onclick="stopScanner()" id="stopScanBtn" style="display: none; background: #dc3545;">স্ক্যানার বন্ধ করুন</button>
+            <h2>পার্সেল স্ক্যান বা খুঁজুন</h2>
+            
+            <!-- Manual Input Option -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 15px; margin-bottom: 20px;">
+                <h3 style="margin-bottom: 15px; color: #667eea;">📝 পার্সেল আইডি দিয়ে খুঁজুন</h3>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="manualParcelId" placeholder="পার্সেল আইডি লিখুন (যেমন: CT000001)" 
+                           style="flex: 1; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; font-size: 16px;">
+                    <button class="btn" onclick="searchParcelManually()" style="white-space: nowrap;">🔍 খুঁজুন</button>
+                </div>
             </div>
-            <div id="qr-reader"></div>
+
+            <!-- QR Scanner Option -->
+            <div style="background: #f8f9fa; padding: 20px; border-radius: 15px;">
+                <h3 style="margin-bottom: 15px; color: #667eea;">📷 QR কোড স্ক্যান করুন</h3>
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <button class="btn" onclick="startScanner()" id="startScanBtn">স্ক্যানার চালু করুন</button>
+                    <button class="btn" onclick="stopScanner()" id="stopScanBtn" style="display: none; background: #dc3545;">স্ক্যানার বন্ধ করুন</button>
+                </div>
+                <div id="qr-reader"></div>
+            </div>
+            
             <div id="scanResult" style="margin-top: 20px;"></div>
         </div>
 
@@ -892,7 +923,8 @@
             <div id="vehicleDetails"></div>
         </div>
     </div>
- <div id="stickerModal" class="modal">
+
+    <div id="stickerModal" class="modal">
         <div class="modal-content">
             <span class="modal-close" onclick="closeModal('stickerModal')">&times;</span>
             <div id="stickerContent"></div>
@@ -902,8 +934,7 @@
             </div>
         </div>
     </div>
- 
-    
+
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
@@ -1088,7 +1119,7 @@
             `;
 
             e.target.reset();
-
+            
             // Show print sticker modal
             showPrintSticker(parcelData);
             
@@ -1771,7 +1802,8 @@
         window.closeModal = (modalId) => {
             document.getElementById(modalId).style.display = 'none';
         };
-  window.showPrintSticker = (parcelData) => {
+
+        window.showPrintSticker = (parcelData) => {
             const stickerHTML = `
                 <div class="print-sticker">
                     <div class="sticker-header">
@@ -1781,7 +1813,7 @@
                     
                     <div class="sticker-qr">
                         <div id="stickerQRCode"></div>
-                        <p style="font-size: 18px; font-weight: 700; margin-top: 10px; color: #667eea;">
+                        <p style="font-size: 13px; font-weight: 700; margin-top: 5px; color: #667eea;">
                             ${parcelData.parcelId}
                         </p>
                     </div>
@@ -1792,44 +1824,25 @@
                             <span class="sticker-value">${parcelData.senderName}</span>
                         </div>
                         <div class="sticker-row">
-                            <span class="sticker-label">ফোন:</span>
-                            <span class="sticker-value">${parcelData.senderPhone}</span>
-                        </div>
-                        <div class="sticker-row">
                             <span class="sticker-label">প্রাপক:</span>
                             <span class="sticker-value">${parcelData.receiverName}</span>
-                        </div>
-                        <div class="sticker-row">
-                            <span class="sticker-label">ফোন:</span>
-                            <span class="sticker-value">${parcelData.receiverPhone}</span>
                         </div>
                         <div class="sticker-row">
                             <span class="sticker-label">গন্তব্য:</span>
                             <span class="sticker-value">${parcelData.destination}</span>
                         </div>
-                        ${parcelData.weight ? `
                         <div class="sticker-row">
-                            <span class="sticker-label">ওজন:</span>
-                            <span class="sticker-value">${parcelData.weight}</span>
-                        </div>
-                        ` : ''}
-                        <div class="sticker-row">
-                            <span class="sticker-label">ডেলিভারি চার্জ:</span>
+                            <span class="sticker-label">চার্জ:</span>
                             <span class="sticker-value">${parcelData.deliveryCharge} ৳</span>
                         </div>
                         <div class="sticker-row">
                             <span class="sticker-label">পেমেন্ট:</span>
                             <span class="sticker-value">${parcelData.paymentStatus}</span>
                         </div>
-                        <div class="sticker-row">
-                            <span class="sticker-label">তারিখ:</span>
-                            <span class="sticker-value">${new Date(parcelData.createdAt).toLocaleDateString('bn-BD')}</span>
-                        </div>
                     </div>
                     
                     <div class="sticker-footer">
                         <p>ট্র্যাকিং: emabirahamed.github.io/chishtiya-transport/track.html</p>
-                        <p>ধন্যবাদ! চিশতিয়া ট্রান্সপোর্ট - নিরাপদ ও দ্রুত সেবা</p>
                     </div>
                 </div>
             `;
@@ -1841,8 +1854,8 @@
                 document.getElementById('stickerQRCode').innerHTML = '';
                 new QRCode(document.getElementById('stickerQRCode'), {
                     text: parcelData.parcelId,
-                    width: 150,
-                    height: 150
+                    width: 100,
+                    height: 100
                 });
             }, 100);
             
@@ -1852,6 +1865,65 @@
         window.printSticker = () => {
             window.print();
         };
+
+        window.searchParcelManually = async () => {
+            const parcelId = document.getElementById('manualParcelId').value.trim().toUpperCase();
+            
+            if (!parcelId) {
+                alert('অনুগ্রহ করে পার্সেল আইডি লিখুন!');
+                return;
+            }
+
+            const parcelRef = ref(database, 'parcels/' + parcelId);
+            const snapshot = await get(parcelRef);
+            
+            if (!snapshot.exists()) {
+                alert('পার্সেল পাওয়া যায়নি! আইডি চেক করুন।');
+                return;
+            }
+
+            const parcel = snapshot.val();
+            showParcelUpdateForm(parcelId, parcel);
+        };
+
+        async function showParcelUpdateForm(parcelId, parcel) {
+            const statusText = {
+                'pending': 'পেন্ডিং',
+                'loaded': 'লোডেড',
+                'unloaded': 'আনলোডেড',
+                'delivered': 'ডেলিভার্ড'
+            };
+
+            document.getElementById('scanResult').innerHTML = `
+                <div style="background: white; padding: 20px; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                    <h3>পার্সেল পাওয়া গেছে!</h3>
+                    <p><strong>পার্সেল আইডি:</strong> ${parcel.parcelId}</p>
+                    <p><strong>প্রেরক:</strong> ${parcel.senderName} (${parcel.senderPhone})</p>
+                    <p><strong>প্রাপক:</strong> ${parcel.receiverName} (${parcel.receiverPhone})</p>
+                    <p><strong>গন্তব্য:</strong> ${parcel.destination}</p>
+                    <p><strong>বর্তমান স্ট্যাটাস:</strong> ${statusText[parcel.status]}</p>
+                    
+                    <h4 style="margin-top: 20px;">স্ট্যাটাস আপডেট করুন:</h4>
+                    <div class="form-group">
+                        <select id="newStatus" onchange="toggleVehicleInput()">
+                            <option value="">নির্বাচন করুন</option>
+                            <option value="loaded">গাড়িতে তোলা</option>
+                            <option value="unloaded">নামানো</option>
+                            <option value="delivered">ডেলিভার্ড</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="vehicleInputGroup" style="display: none;">
+                        <label>গাড়ি নম্বর *</label>
+                        <input type="text" id="vehicleNumber" placeholder="যেমন: ঢাকা-মেট্রো-গ-১২-৩৪৫৬">
+                    </div>
+                    <div class="form-group" id="locationInputGroup" style="display: none;">
+                        <label>অবস্থান *</label>
+                        <input type="text" id="currentLocation" placeholder="বর্তমান অবস্থান">
+                    </div>
+                    <button class="btn" onclick="updateParcelStatus('${parcelId}')">আপডেট করুন</button>
+                </div>
+            `;
+        }
 
         window.onclick = (event) => {
             if (event.target.classList.contains('modal')) {
