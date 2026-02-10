@@ -554,6 +554,94 @@
                 flex-direction: column;
             }
         }
+        
+        /* Print Sticker Styles */
+        .print-sticker {
+            background: white;
+            padding: 30px;
+            max-width: 400px;
+            margin: 0 auto;
+            border: 3px dashed #667eea;
+            border-radius: 10px;
+        }
+
+        .sticker-header {
+            text-align: center;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+
+        .sticker-header h2 {
+            color: #667eea;
+            margin-bottom: 5px;
+            font-size: 24px;
+        }
+
+        .sticker-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .sticker-qr {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .sticker-info {
+            margin: 15px 0;
+        }
+
+        .sticker-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dotted #ddd;
+        }
+
+        .sticker-label {
+            font-weight: 600;
+            color: #333;
+        }
+
+        .sticker-value {
+            color: #666;
+        }
+
+        .sticker-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 3px solid #667eea;
+            font-size: 12px;
+            color: #999;
+        }
+
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #stickerModal, #stickerModal * {
+                visibility: visible;
+            }
+            #stickerModal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+            }
+            .modal {
+                background: white !important;
+            }
+            .modal-content {
+                box-shadow: none !important;
+                margin: 0 !important;
+                max-width: 100% !important;
+            }
+            .modal-close, .btn {
+                display: none !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -804,7 +892,18 @@
             <div id="vehicleDetails"></div>
         </div>
     </div>
-
+ <div id="stickerModal" class="modal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('stickerModal')">&times;</span>
+            <div id="stickerContent"></div>
+            <div style="text-align: center; margin-top: 20px;">
+                <button class="btn" onclick="printSticker()">🖨️ প্রিন্ট করুন</button>
+                <button class="btn" onclick="closeModal('stickerModal')" style="background: #6c757d; margin-left: 10px;">বন্ধ করুন</button>
+            </div>
+        </div>
+    </div>
+ 
+    
     <!-- Firebase SDK -->
     <script type="module">
         import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
@@ -989,6 +1088,10 @@
             `;
 
             e.target.reset();
+
+            // Show print sticker modal
+            showPrintSticker(parcelData);
+            
             setTimeout(() => {
                 document.getElementById('addParcelMessage').innerHTML = '';
             }, 5000);
@@ -1667,6 +1770,87 @@
 
         window.closeModal = (modalId) => {
             document.getElementById(modalId).style.display = 'none';
+        };
+  window.showPrintSticker = (parcelData) => {
+            const stickerHTML = `
+                <div class="print-sticker">
+                    <div class="sticker-header">
+                        <h2>🚛 চিশতিয়া ট্রান্সপোর্ট</h2>
+                        <p>পার্সেল রিসিট</p>
+                    </div>
+                    
+                    <div class="sticker-qr">
+                        <div id="stickerQRCode"></div>
+                        <p style="font-size: 18px; font-weight: 700; margin-top: 10px; color: #667eea;">
+                            ${parcelData.parcelId}
+                        </p>
+                    </div>
+                    
+                    <div class="sticker-info">
+                        <div class="sticker-row">
+                            <span class="sticker-label">প্রেরক:</span>
+                            <span class="sticker-value">${parcelData.senderName}</span>
+                        </div>
+                        <div class="sticker-row">
+                            <span class="sticker-label">ফোন:</span>
+                            <span class="sticker-value">${parcelData.senderPhone}</span>
+                        </div>
+                        <div class="sticker-row">
+                            <span class="sticker-label">প্রাপক:</span>
+                            <span class="sticker-value">${parcelData.receiverName}</span>
+                        </div>
+                        <div class="sticker-row">
+                            <span class="sticker-label">ফোন:</span>
+                            <span class="sticker-value">${parcelData.receiverPhone}</span>
+                        </div>
+                        <div class="sticker-row">
+                            <span class="sticker-label">গন্তব্য:</span>
+                            <span class="sticker-value">${parcelData.destination}</span>
+                        </div>
+                        ${parcelData.weight ? `
+                        <div class="sticker-row">
+                            <span class="sticker-label">ওজন:</span>
+                            <span class="sticker-value">${parcelData.weight}</span>
+                        </div>
+                        ` : ''}
+                        <div class="sticker-row">
+                            <span class="sticker-label">ডেলিভারি চার্জ:</span>
+                            <span class="sticker-value">${parcelData.deliveryCharge} ৳</span>
+                        </div>
+                        <div class="sticker-row">
+                            <span class="sticker-label">পেমেন্ট:</span>
+                            <span class="sticker-value">${parcelData.paymentStatus}</span>
+                        </div>
+                        <div class="sticker-row">
+                            <span class="sticker-label">তারিখ:</span>
+                            <span class="sticker-value">${new Date(parcelData.createdAt).toLocaleDateString('bn-BD')}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="sticker-footer">
+                        <p>ট্র্যাকিং: emabirahamed.github.io/chishtiya-transport/track.html</p>
+                        <p>ধন্যবাদ! চিশতিয়া ট্রান্সপোর্ট - নিরাপদ ও দ্রুত সেবা</p>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('stickerContent').innerHTML = stickerHTML;
+            
+            // Generate QR code after modal content is rendered
+            setTimeout(() => {
+                document.getElementById('stickerQRCode').innerHTML = '';
+                new QRCode(document.getElementById('stickerQRCode'), {
+                    text: parcelData.parcelId,
+                    width: 150,
+                    height: 150
+                });
+            }, 100);
+            
+            document.getElementById('stickerModal').style.display = 'block';
+        };
+
+        window.printSticker = () => {
+            window.print();
         };
 
         window.onclick = (event) => {
