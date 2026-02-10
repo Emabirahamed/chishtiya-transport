@@ -942,8 +942,10 @@
             });
         }
 
-        window.addParcel = async (e) => {
-            e.preventDefault();
+        if (!currentUserData) {
+                alert('অনুগ্রহ করে লগইন করুন!');
+                return;
+            }
             
             const counterRef = ref(database, 'counter');
             const counterSnapshot = await get(counterRef);
@@ -965,7 +967,7 @@
                 description: document.getElementById('description').value || '',
                 status: 'pending',
                 createdAt: new Date().toISOString(),
-                createdBy: currentUserData.name,
+                createdBy: currentUserData.name || 'Unknown',
                 tracking: [{
                     status: 'পার্সেল তৈরি করা হয়েছে',
                     location: 'ঢাকা অফিস',
@@ -1153,16 +1155,34 @@
             document.getElementById('stopScanBtn').style.display = 'inline-block';
 
             html5QrCode = new Html5Qrcode("qr-reader");
-            html5QrCode.start(
+          html5QrCode.start(
                 { facingMode: "environment" },
                 { fps: 10, qrbox: 250 },
                 onScanSuccess
-            );
+            ).catch(err => {
+                console.error('Scanner error:', err);
+                document.getElementById('scanResult').innerHTML = `
+                    <div class="alert alert-error">
+                        <strong>ক্যামেরা অ্যাক্সেস করা যায়নি!</strong><br>
+                        অনুগ্রহ করে ক্যামেরা পারমিশন দিন বা অন্য ডিভাইস ব্যবহার করুন।
+                    </div>
+                `;
+                document.getElementById('startScanBtn').style.display = 'inline-block';
+                document.getElementById('stopScanBtn').style.display = 'none';
+            });
         };
 
         window.stopScanner = () => {
-            if (html5QrCode) {
-                html5QrCode.stop();
+            if (html5QrCode && html5QrCode.isScanning) {
+                html5QrCode.stop().then(() => {
+                    document.getElementById('startScanBtn').style.display = 'inline-block';
+                    document.getElementById('stopScanBtn').style.display = 'none';
+                }).catch(err => {
+                    console.error('Stop scanner error:', err);
+                    document.getElementById('startScanBtn').style.display = 'inline-block';
+                    document.getElementById('stopScanBtn').style.display = 'none';
+                });
+            } else {
                 document.getElementById('startScanBtn').style.display = 'inline-block';
                 document.getElementById('stopScanBtn').style.display = 'none';
             }
@@ -1254,7 +1274,10 @@
                 alert('অবস্থান লিখুন!');
                 return;
             }
-
+            if (!currentUserData) {
+                alert('অনুগ্রহ করে লগইন করুন!');
+                return;
+            }
             const parcelRef = ref(database, 'parcels/' + parcelId);
             const snapshot = await get(parcelRef);
             const parcel = snapshot.val();
@@ -1269,7 +1292,7 @@
                 status: statusDescriptions[newStatus],
                 location: currentLocation,
                 timestamp: new Date().toISOString(),
-                user: currentUserData.name,
+                user: currentUserData.name || 'Unknown',
                 vehicleNumber: vehicleNumber || null
             };
 
