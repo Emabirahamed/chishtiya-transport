@@ -2,7 +2,11 @@
 <html lang="bn">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="theme-color" content="#667eea">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>চিশতিয়া ট্রান্সপোর্ট ম্যানেজমেন্ট সিস্টেম</title>
     <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -543,29 +547,256 @@
         }
 
         @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+
+            .container {
+                border-radius: 10px;
+            }
+
+            .header {
+                padding: 20px 15px;
+            }
+
             .header h1 {
-                font-size: 1.5em;
+                font-size: 1.3em;
+                margin-bottom: 5px;
             }
 
             .header .user-info {
                 position: static;
-                margin-top: 20px;
+                margin-top: 15px;
+                font-size: 14px;
+            }
+
+            .header .user-info button {
+                padding: 6px 15px;
+                font-size: 14px;
             }
 
             .tabs {
-                flex-direction: column;
+                flex-direction: row;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
             }
 
             .tab {
                 border-bottom: 1px solid #e0e0e0;
+                padding: 15px 12px;
+                font-size: 13px;
+                min-width: 100px;
+            }
+
+            .tab-content {
+                padding: 15px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr 1fr;
+                gap: 10px;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-card h3 {
+                font-size: 12px;
+            }
+
+            .stat-card .value {
+                font-size: 24px;
+            }
+
+            .form-group {
+                margin-bottom: 15px;
+            }
+
+            .form-group label {
+                font-size: 14px;
+            }
+
+            .form-group input,
+            .form-group select,
+            .form-group textarea {
+                padding: 10px;
+                font-size: 14px;
+            }
+
+            .btn {
+                padding: 12px 20px;
+                font-size: 15px;
+                width: 100%;
+            }
+
+            .table-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            table {
+                font-size: 12px;
+            }
+
+            th, td {
+                padding: 10px 8px;
+                white-space: nowrap;
+            }
+
+            .action-btns {
+                flex-direction: column;
+                gap: 5px;
+            }
+
+            .btn-small {
+                width: 100%;
+                font-size: 12px;
+                padding: 6px 10px;
+            }
+
+            .modal-content {
+                margin: 20px;
+                padding: 20px;
+                max-width: 100%;
+            }
+
+            .vehicle-grid {
+                grid-template-columns: 1fr;
+                gap: 15px;
+            }
+
+            .vehicle-card {
+                padding: 15px;
+            }
+
+            .chart-container {
+                padding: 15px;
+            }
+
+            #qr-reader {
+                max-width: 100%;
+            }
+
+            .qr-helper {
+                font-size: 12px;
+                padding: 10px;
+            }
+
+            .search-box input {
+                padding: 12px;
+                font-size: 14px;
+            }
+
+            .timeline-item {
+                font-size: 13px;
+                padding-left: 25px;
+            }
+
+            .info-grid {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+
+            .login-container {
+                margin: 50px auto;
+                padding: 25px;
+            }
+
+            .login-container h2 {
+                font-size: 1.5em;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 1.1em;
             }
 
             .stats-grid {
                 grid-template-columns: 1fr;
             }
 
-            .action-btns {
-                flex-direction: column;
+            .tab {
+                font-size: 11px;
+                padding: 12px 8px;
+                min-width: 80px;
+            }
+
+            table {
+                font-size: 11px;
+            }
+
+            th, td {
+                padding: 8px 5px;
+            }
+
+            .modal-content {
+                margin: 10px;
+                padding: 15px;
+            }
+
+            .stat-card .value {
+                font-size: 20px;
+            }
+        }
+
+        /* Touch-friendly improvements for mobile devices */
+        @media (hover: none) and (pointer: coarse) {
+            .btn, .btn-small {
+                min-height: 44px;
+                min-width: 44px;
+            }
+
+            input, select, textarea {
+                min-height: 44px;
+                font-size: 16px !important;
+            }
+
+            .tab {
+                min-height: 44px;
+                padding: 12px 15px;
+            }
+
+            .action-btns button {
+                min-height: 40px;
+            }
+
+            .modal-close {
+                min-width: 44px;
+                min-height: 44px;
+                padding: 7px;
+            }
+        }
+
+        /* Landscape mode optimization for tablets and phones */
+        @media (max-width: 768px) and (orientation: landscape) {
+            .header {
+                padding: 10px 15px;
+            }
+
+            .header h1 {
+                font-size: 1.2em;
+                margin-bottom: 5px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 8px;
+            }
+
+            .stat-card {
+                padding: 10px;
+            }
+
+            .tabs {
+                overflow-x: auto;
+            }
+
+            .tab-content {
+                padding: 15px;
+                max-height: calc(100vh - 200px);
+                overflow-y: auto;
             }
         }
 
